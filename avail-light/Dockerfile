@@ -1,5 +1,10 @@
 FROM rust:latest
 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    clang \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 RUN git clone https://github.com/availproject/avail-light.git .
