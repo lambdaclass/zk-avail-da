@@ -13,17 +13,7 @@ To achieve interoperability, the project requires setting up three nodes and a D
 
 ## Requirements
 
-Ensure you have the following dependencies installed:
-
-- Rust
-- Go
-- Protocol Buffers
-
-You can install Protocol Buffers using Homebrew with the following command:
-
-```sh
-brew install protobuf
-```
+Docker and Docker Compose are required to run the services. Ensure you have Docker installed on your system before proceeding.
 
 ## Running Avail DA
 
