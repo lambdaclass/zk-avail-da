@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  avail-da:
+    build:
+      context: ./avail-da-node
+      dockerfile: Dockerfile
+    command: ./avail-da-node
+
+  avail-light-bootstrap:
+    build:
+      context: ./avail-light-bootstrap
+      dockerfile: Dockerfile
+
+  avail-light:
+    build:
+      context: ./avail-light
+      dockerfile: Dockerfile
+
+  avail-da-server:
+    build:
+      context: ./avail-da-server
+      dockerfile: Dockerfile
+    command: ./avail-da-server

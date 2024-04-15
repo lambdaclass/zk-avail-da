@@ -1,10 +1,11 @@
 # ZKSync Era Integration with Avail DA
 
-This project aims to export data from [ZKSync Era](https://github.com/matter-labs/zksync-era) to [AvailDA](https://www.availproject.org/da), facilitating interoperability between the two blockchain ecosystems.
+This project aims to export data from [ZKSync Era](https://github.com/matter-labs/zksync-era) to [AvailDA](https://www.availproject.org/da).
 
-## How it works?
+## How it Works
 
-We need to run three nodes and the DA server:
+To achieve interoperability, the project requires setting up three nodes and a DA server:
+
 - **Avail DA node**: Official client for the Avail blockchain.
 - **Avail light node**: DA light client which listens on Avail network for finalized blocks.
 - **Avail light Bootstrap node**: Bootstrap node for Avail light client.
@@ -26,18 +27,8 @@ brew install protobuf
 
 ## Running Avail DA
 
-To set up and run Avail DA, follow these steps:
-
-1. **Clone Repositories and Compile Projects**:
-    - This command clones the necessary repositories and compiles the projects:
-
-    ```sh
-    make install
-    ```
-
-2. **Start Avail DA Nodes and Server**:
-    - This command initializes the Avail DA nodes and server:
-
-    ```sh
-    make run
-    ```
+To set up and run Avail DA, execute the following command:
+```sh
+make run-avail-da
+```
+This command will handle the necessary setup and execution steps for Avail DA.
