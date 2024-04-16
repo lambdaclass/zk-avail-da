@@ -5,20 +5,34 @@ services:
     build:
       context: ./avail-da-node
       dockerfile: Dockerfile
-    command: ./avail-da-node
+    ports:
+      - "30333:30333"
+      - "9944:9944"
 
   avail-light-bootstrap:
     build:
       context: ./avail-light-bootstrap
       dockerfile: Dockerfile
+    ports:
+      - "7700:7700"
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   avail-light:
     build:
       context: ./avail-light
       dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - avail-da-node
 
   avail-da-server:
     build:
       context: ./avail-da-server
       dockerfile: Dockerfile
-    command: ./avail-da-server
+    ports:
+      - "3000:3000"

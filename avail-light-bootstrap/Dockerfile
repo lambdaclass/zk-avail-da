@@ -4,4 +4,4 @@ WORKDIR /app
 
 RUN git clone https://github.com/availproject/avail-light-bootstrap.git .
 
-RUN cargo build --release
+CMD ["cargo", "run", "--release"]
