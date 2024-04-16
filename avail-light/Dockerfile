@@ -11,6 +11,8 @@ RUN git clone https://github.com/availproject/avail-light.git .
 
 RUN git fetch && git checkout v1.7.8
 
-COPY config.yaml .
+COPY wait_for_node.sh .
 
-RUN cargo run --release -- --network local -c config.yaml --clean
+RUN chmod +x wait_for_node.sh
+
+COPY config.yaml .

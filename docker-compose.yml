@@ -27,6 +27,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    command:
+      sh -c "./wait_for_node.sh"
     depends_on:
       - avail-da-node
 
