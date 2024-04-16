@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while ! curl -s avail-da-node:9944 > /dev/null; do
+while ! nc -z avail-da-node 9944; do
     echo "Waiting for avail-da-node to start..."
     sleep 10
 done
