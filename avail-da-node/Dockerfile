@@ -12,4 +12,4 @@ RUN git clone https://github.com/availproject/avail.git .
 
 RUN git fetch && git checkout v1.10.0.0
 
-CMD ["cargo", "run", "--locked", "--release", "--", "--dev", "--enable-kate-rpc"]
+CMD ["cargo", "run", "--locked", "--release", "--", "--dev", "--enable-kate-rpc", "--rpc-external", "--rpc-port",  "9944", "--rpc-cors", "all"]
