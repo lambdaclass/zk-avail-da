@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while ! nc -z avail-da-node 9944; do
+while ! nc -z localhost 9944; do
     echo "Waiting for avail-da-node to start..."
     sleep 10
 done
