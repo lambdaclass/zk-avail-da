@@ -6,3 +6,4 @@ run-avail-da:
 
 clean:
 	docker-compose down --remove-orphans
+	docker-compose build
