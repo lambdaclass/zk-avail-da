@@ -1,4 +1,4 @@
-.PHONY: run-avail-da clean
+.PHONY: run-avail-da clean build
 
 run-avail-da:
 	@echo "Starting Avail services..."
@@ -6,4 +6,6 @@ run-avail-da:
 
 clean:
 	docker-compose down --remove-orphans
+
+build:
 	docker-compose build
