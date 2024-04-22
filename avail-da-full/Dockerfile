@@ -5,9 +5,7 @@ RUN apt-get update && apt-get install -y \
     clang \
     protobuf-compiler \
     socat \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y golang \
+    golang \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/avail-da-node
