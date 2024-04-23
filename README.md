@@ -19,6 +19,28 @@ Docker and Docker Compose are required to run the services. Ensure you have Dock
 
 To set up and run Avail DA, execute the following command:
 ```sh
-make run-avail-da
+make avail-da
 ```
 This command will handle the necessary setup and execution steps for Avail DA.
+
+## Using the API Light Node
+
+After setting up Avail DA, you can interact with the API Light Node by sending requests to port 8080. Here are a couple of example requests:
+
+### Get Latest Block
+```sh
+curl http://127.0.0.1:8080/v1/latest_block
+```
+Response:
+```json
+{"latest_block":168}
+```
+
+### Get Block Status
+```sh
+curl http://127.0.0.1:8080/v2/blocks/158
+```
+Response:
+```json
+{"status":"finished","confidence":93.75}
+```
