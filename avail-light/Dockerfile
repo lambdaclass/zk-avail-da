@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     clang \
     socat \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,3 +18,5 @@ COPY wait_for_node.sh .
 RUN chmod +x wait_for_node.sh
 
 COPY config.yaml .
+
+COPY nginx.conf /etc/nginx/nginx.conf

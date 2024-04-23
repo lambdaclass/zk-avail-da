@@ -4,8 +4,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     clang \
     protobuf-compiler \
-    socat \
     golang \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/avail-da-node
@@ -27,8 +27,9 @@ RUN cargo build --release
 
 COPY wait_for_node.sh /app/avail-light/wait_for_node.sh
 COPY config.yaml /app/avail-light/config.yaml
+COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 9944 3000 7700 39000 8000
+EXPOSE 9944 3000 7700 39000 8000 8080
 
 CMD sh -c "\
     cd /app/avail-da-node && \
