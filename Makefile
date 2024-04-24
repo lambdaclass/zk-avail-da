@@ -2,7 +2,7 @@
 
 avail-da: clean build
 	@echo "Starting Avail services..."
-	docker-compose up -d
+	docker-compose up -d && docker-compose logs -f
 
 clean:
 	docker-compose down --remove-orphans
