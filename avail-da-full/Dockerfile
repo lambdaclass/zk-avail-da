@@ -29,7 +29,7 @@ COPY wait_for_node.sh /app/avail-light/wait_for_node.sh
 COPY config.yaml /app/avail-light/config.yaml
 COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 9944 3000 7700 39000 8000 8080
+EXPOSE 9944 3000 7700 39000 8000 8001
 
 CMD sh -c "\
     cd /app/avail-da-node && \
