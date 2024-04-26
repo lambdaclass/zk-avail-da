@@ -21,4 +21,4 @@ RUN nginx -g 'daemon off;' -c /etc/nginx/nginx.conf &
 
 EXPOSE 8001
 
-CMD ["cargo", "run", "--release", "--", "--network", "goldberg", "-c", "config.yaml",  "--clean"]
+CMD ["cargo", "run", "--release", "--", "-c", "config.yaml",  "--clean"]
