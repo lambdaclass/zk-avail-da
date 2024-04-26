@@ -23,6 +23,14 @@ make avail-da
 ```
 This command will handle the necessary setup and execution steps for Avail DA.
 
+## Running Avail DA Testnet
+
+To configure and run Avail DA with Goldberg's Testnet, run the following command:
+```sh
+make avail-da-testnet
+```
+This command will create a single Light Node docker with the necessary configuration to use this testnet. Unlike the local Avail DA, it will listen on port 8002.
+
 ## Using the API Light Node
 
 After setting up Avail DA, you can interact with the API Light Node by sending requests to port 8001. Here are a couple of example requests:
