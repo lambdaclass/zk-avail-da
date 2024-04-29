@@ -1,4 +1,4 @@
-.PHONY: avail-da clean build avail-da-full avail-da-testnet
+.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data
 
 avail-da: clean build
 	@echo "Starting Avail services..."
@@ -19,3 +19,8 @@ avail-da-testnet:
 	cd avail-da-testnet && \
 	docker build -t avail-da-testnet . && \
 	docker run -p 8002:8001 -it --name avail-da-testnet avail-da-testnet
+
+send-data:
+	cd da-sender && \
+	cargo build && \
+	cargo run
