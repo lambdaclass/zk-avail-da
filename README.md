@@ -109,10 +109,12 @@ Got batch #1 pubdata
 
 ### Step 4: Send Pubdata to AvailDA
 
-Now, you can send the retrieved pubdata to your local AvailDA using the Light Node. Replace `[CONTENT OF da_manager_example/data/pubdata_storage.json]` with the actual content of the `da_manager_example/data/pubdata_storage.json` file encoded in [Base64](https://www.base64encode.org/).
+Now, you can send the retrieved pubdata to your local AvailDA using the Light Node. First, replace the content of `da-sender/data/pubdata_storage.json` with the content of `da_manager_example/data/pubdata_storage.json` from `zksync-era`.
+
+After updating the `pubdata_storage.json`, navigate to your project directory and run the following command:
 
 ```sh
-curl -XPOST 127.0.0.1:8001/v2/submit --header "Content-Type: application/json" --data '{"data":"[CONTENT OF da_manager_example/data/pubdata_storage.json]"}'
+make send-data
 ```
 
-You should receive a success message confirming the submission of pubdata to AvailDA.
+This command will trigger the submission of the pubdata to AvailDA. Upon successful submission, you should receive a confirmation message indicating the successful transmission of pubdata to AvailDA.
