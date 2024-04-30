@@ -19,4 +19,6 @@ RUN chmod +x wait_for_node.sh
 
 COPY config.yaml .
 
+COPY identity.toml .
+
 COPY nginx.conf /etc/nginx/nginx.conf
