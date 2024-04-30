@@ -1,4 +1,4 @@
-.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data
+.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data get-data
 
 avail-da: clean build
 	@echo "Starting Avail services..."
@@ -24,3 +24,10 @@ send-data:
 	cd da-sender && \
 	cargo build --release && \
 	cargo run --release
+
+get-data:
+	@if [ -z "$(block)" ]; then \
+		echo "Please provide a block parameter, e.g., make get-block-data block=BLOCK_NUMBER"; \
+		exit 1; \
+	fi
+	curl "http://127.0.0.1:8001/v1/appdata/$(block)?decode=true"

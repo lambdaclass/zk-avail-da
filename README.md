@@ -116,5 +116,11 @@ After updating the `pubdata_storage.json`, navigate to your project directory an
 ```sh
 make send-data
 ```
+This command will trigger the sending of the pubdata to AvailDA. If the send is successful, you should receive information such as the block hash, block number, hash and index in AvailDA.
 
-This command will trigger the submission of the pubdata to AvailDA. Upon successful submission, you should receive a confirmation message indicating the successful transmission of pubdata to AvailDA.
+## Get Block Data from AvailDA
+If you want to get block data from AvailDA, you can use the following command:
+```sh
+make get-block-data block=BLOCK_NUMBER
+```
+Replace `BLOCK_NUMBER` with the block number you want to fetch data for. This command will execute a Curl request to fetch data for the specified block from AvailDA.
