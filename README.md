@@ -119,8 +119,11 @@ make send-data
 This command will trigger the sending of the pubdata to AvailDA. If the send is successful, you should receive information such as the block hash, block number, hash and index in AvailDA.
 
 ## Get Block Data from AvailDA
+
 If you want to get block data from AvailDA, you can use the following command:
+
 ```sh
-make get-block-data block=BLOCK_NUMBER
+make get-data
 ```
-Replace `BLOCK_NUMBER` with the block number you want to fetch data for. This command will execute a Curl request to fetch data for the specified block from AvailDA.
+
+You will be prompted to enter the block number and you will get your original decoded data in `da-getter/data/retrieved_data.json`.

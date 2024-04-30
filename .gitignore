@@ -1,2 +1,3 @@
-da-sender/target
+**/target
 da-sender/data
+da-getter/data/retrieved_data.json
