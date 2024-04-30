@@ -1,4 +1,5 @@
 use base64;
+use owo_colors::OwoColorize;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
@@ -34,7 +35,13 @@ async fn run() -> Result<(), Box<dyn Error>> {
         .await;
 
     let body: serde_json::Value  = res?.json().await?;
-
-    println!("{:#?}", body);
+    print!("{:#}","Block hash: ".green());
+    println!("{:#}", body["block_hash"]);
+    print!("{:#}","Block number: ".cyan());
+    println!("{:#}", body["block_number"]);
+    print!("{:#}", "Hash: ".magenta());
+    println!("{:#}", body["hash"]);
+    print!("{:#}", "Index: ".yellow());
+    println!("{:#}", body["index"]);
     Ok(())
 }
