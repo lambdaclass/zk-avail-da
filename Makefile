@@ -22,5 +22,5 @@ avail-da-testnet:
 
 send-data:
 	cd da-sender && \
-	cargo build && \
-	cargo run
+	cargo build --release && \
+	cargo run --release

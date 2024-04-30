@@ -1,37 +1,40 @@
-use std::fs;
 use base64;
+use std::collections::HashMap;
+use std::error::Error;
+use std::fs;
+use tokio;
+use base64::prelude::*;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    run().await
+}
+
+async fn run() -> Result<(), Box<dyn Error>> {
     // Read the content of the file pubdata_storage.json
     let file_content = match fs::read_to_string("data/pubdata_storage.json") {
         Ok(content) => content,
         Err(e) => {
             eprintln!("Error reading file: {}", e);
-            return;
+            return Err(Box::new(e));
         }
     };
 
     // Convert the content to Base64
-    let base64_content = base64::encode(file_content);
+    let base64_content = BASE64_STANDARD.encode(file_content);
 
-    // Send the data using curl
-    let curl_command = format!(
-        "curl -XPOST 127.0.0.1:8001/v2/submit --header \"Content-Type: application/json\" --data '{{\"data\":\"{}\"}}'",
-        base64_content
-    );
+    let mut map = HashMap::new();
+    map.insert("data", base64_content);
 
-    let output = std::process::Command::new("sh")
-        .arg("-c")
-        .arg(&curl_command)
-        .output()
-        .expect("Error executing curl command");
+    let client = reqwest::Client::new();
+    let res = client
+        .post("http://127.0.0.1:8001/v2/submit")
+        .json(&map)
+        .send()
+        .await;
 
-    if output.status.success() {
-        println!("Data sent successfully");
-    } else {
-        eprintln!(
-            "Error sending data: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-    }
+    let body: serde_json::Value  = res?.json().await?;
+
+    println!("{:#?}", body);
+    Ok(())
 }
