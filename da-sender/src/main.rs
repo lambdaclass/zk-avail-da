@@ -5,6 +5,7 @@ use std::fs;
 use base64::prelude::*;
 use std::{thread, time};
 use std::env;
+use spinners::{Spinner, Spinners};
 
 const FILE_PATH: &str = "da_manager_example/data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
@@ -36,7 +37,10 @@ async fn run() -> Result<(), Box<dyn Error>> {
         print_results(&body);
 
         // Sleeps 60 seconds to wait for data to be processed
+        let mut sp = Spinner::new(Spinners::Aesthetic, "Retrieving more data from the block...".into());
         thread::sleep(time::Duration::from_secs(60));
+        sp.stop();
+        println!();
 
         // Perform GET request for block header information
         let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
@@ -84,7 +88,9 @@ fn print_results(body: &serde_json::Value) {
 }
 
 fn print_block_header(body: &serde_json::Value) {
+    println!();
     println!("{:#}","Block Information".underline().bold());
+    println!();
     print!("{:#}", "Block Hash: ".green());
     println!("{:#}", body["hash"]);
     print!("{:#}", "Parent Hash: ".magenta());
