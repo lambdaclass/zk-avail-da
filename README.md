@@ -107,15 +107,16 @@ Starting from batch #1
 Got batch #1 pubdata
 ```
 
+You can see the retrieved data in `da_manager_example/data/pubdata_storage.json`.
+
 ### Step 4: Send Pubdata to AvailDA
 
-Now, you can send the retrieved pubdata to your local AvailDA using the Light Node. First, replace the content of `da-sender/data/pubdata_storage.json` with the content of `da_manager_example/data/pubdata_storage.json` from `zksync-era`.
-
-After updating the `pubdata_storage.json`, navigate to your project directory and run the following command:
+Now, going back to the directory of this project, you can send the retrieved pubdata to your local AvailDA using the Light Node by executing the following command:
 
 ```sh
 make send-data
 ```
+
 This command will trigger the sending of the pubdata to AvailDA. If the send is successful, you should receive information such as the block hash, block number, hash and index in AvailDA.
 
 ## Get Block Data from AvailDA

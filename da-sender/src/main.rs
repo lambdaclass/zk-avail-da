@@ -4,8 +4,9 @@ use std::error::Error;
 use std::fs;
 use base64::prelude::*;
 use std::{thread, time};
+use std::env;
 
-const FILE_PATH: &str = "data/pubdata_storage.json";
+const FILE_PATH: &str = "da_manager_example/data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
 const BLOCK_URL: &str = "http://127.0.0.1:8001/v2/blocks/";
 
@@ -19,7 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 async fn run() -> Result<(), Box<dyn Error>> {
     // Read the content of the file pubdata_storage.json
-    let file_content = fs::read_to_string(FILE_PATH)?;
+    let file_content = read_pubdata().await?;
 
     // Convert the content to Base64
     let base64_content = BASE64_STANDARD.encode(file_content);
@@ -55,6 +56,17 @@ async fn run() -> Result<(), Box<dyn Error>> {
     drop(client);
 
     Ok(())
+}
+
+async fn read_pubdata() -> Result<String, Box<dyn Error>> {
+    let zksync_home = env::var("ZKSYNC_HOME")
+        .map_err(|_| "The ZKSYNC_HOME environment variable is not defined.")?;
+
+    let file_path = format!("{}/{}", zksync_home, FILE_PATH);
+
+    let file_content = fs::read_to_string(file_path)?;
+
+    Ok(file_content)
 }
 
 fn print_results(body: &serde_json::Value) {
