@@ -35,12 +35,11 @@ async fn run() -> Result<(), Box<dyn Error>> {
         let body: serde_json::Value = res.json().await?;
         print_results(&body);
 
-        let ten_millis = time::Duration::from_secs(60);
+        // Sleeps 60 seconds to wait for data to be processed
+        thread::sleep(time::Duration::from_secs(60));
 
-        thread::sleep(ten_millis);
         // Perform GET request for block header information
         let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
-        println!("{:#}", block_header_url.red());
         let header_res = client.get(block_header_url).send().await?;
         if header_res.status().is_success() {
             let header_body: serde_json::Value = header_res.json().await?;
@@ -79,14 +78,16 @@ fn print_results(body: &serde_json::Value) {
     println!("{:#}", body["hash"]);
     print!("{:#}", "Index: ".yellow());
     println!("{:#}", body["index"]);
+    println!();
+    println!("{:#}", "Data successfully submitted!".green());
+    println!();
 }
 
 fn print_block_header(body: &serde_json::Value) {
-    println!();
-    println!("Block Header Information:");
-    print!("{:#}", "Hash: ".magenta());
+    println!("{:#}","Block Information".underline().bold());
+    print!("{:#}", "Block Hash: ".green());
     println!("{:#}", body["hash"]);
-    print!("{:#}", "Parent Hash: ".cyan());
+    print!("{:#}", "Parent Hash: ".magenta());
     println!("{:#}", body["parent_hash"]);
     print!("{:#}", "Block Number: ".cyan());
     println!("{:#}", body["number"]);
@@ -98,33 +99,33 @@ fn print_block_header(body: &serde_json::Value) {
     // Additional data
     if let Some(extension) = body["extension"].as_object() {
         println!("Extension Information:");
-        print!("{}", "  Rows: ".yellow());
+        print!("{}", "  Rows: ".white());
         println!("{}", extension["rows"]);
-        print!("{}", "  Cols: ".yellow());
+        print!("{}", "  Cols: ".white());
         println!("{}", extension["cols"]);
-        print!("{}", "Data Root: ".magenta());
+        print!("{}", "  Data Root: ".white());
         println!("{}", extension["data_root"]);
 
         if let Some(commitments) = extension["commitments"].as_array() {
-            println!("{}","Commitments:".green());
+            println!("{}","  Commitments:".white());
             for commitment in commitments {
-                println!("  {}", commitment);
+                println!("    {}", commitment);
             }
         }
 
         if let Some(app_lookup) = extension["app_lookup"].as_object() {
-            println!("{}","App Lookup Information:".cyan());
-            print!("{}","Size: ".magenta());
+            println!("{}","  App Lookup Information:".white());
+            print!("{}","    Size: ".white());
             println!("{}", app_lookup["size"]);
 
             if let Some(index) = app_lookup["index"].as_array() {
-                println!("{}","Index:".yellow());
+                println!("{}","    Index:".white());
                 for item in index {
                     if let Some(app_id) = item["appId"].as_u64() {
-                        println!("  App ID: {}", app_id);
+                        println!("      App ID: {}", app_id);
                     }
                     if let Some(start) = item["start"].as_u64() {
-                        println!("  Start: {}", start);
+                        println!("      Start: {}", start);
                     }
                 }
             }
