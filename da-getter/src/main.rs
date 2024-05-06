@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::fs;
-use std::io::{self, Write};
+use std::io::{self};
 use base64::prelude::*;
 
 const FILE_PATH: &str = "data/retrieved_data.json";
