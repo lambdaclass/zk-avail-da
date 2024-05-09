@@ -128,3 +128,12 @@ make get-data
 ```
 
 You will be prompted to enter the block number and you will get your original decoded data in `da-getter/data/retrieved_data.json`.
+
+
+## Send custom pubdata to AvailDA
+
+After updating the `da-sender/data/pubdata_storage.json`, run the following command:
+
+```sh
+make send-custom-data
+```
