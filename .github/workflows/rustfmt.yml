@@ -21,5 +21,8 @@ jobs:
         with:
           components: rustfmt
 
-      - name: Run rustfmt
-        run: cargo fmt --all -- --check
+      - name: Run rustfmt da-sender
+        run: cd da-sender && cargo fmt --all -- --check
+
+      - name: Run rustfmt da-getter
+        run: cd da-getter && cargo fmt --all -- --check
