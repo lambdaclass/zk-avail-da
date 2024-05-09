@@ -34,3 +34,9 @@ get-data:
 	cd da-getter && \
 	cargo build --release && \
 	cargo run --release
+
+format:
+	cd da-sender && \
+	cargo fmt
+	cd da-getter && \
+	cargo fmt

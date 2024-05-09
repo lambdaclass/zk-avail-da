@@ -1,7 +1,7 @@
+use base64::prelude::*;
 use std::error::Error;
 use std::fs;
 use std::io::{self};
-use base64::prelude::*;
 
 const FILE_PATH: &str = "data/retrieved_data.json";
 const ENDPOINT_URL: &str = "http://127.0.0.1:8001/v1/appdata/";
@@ -20,7 +20,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if response.status().is_success() {
         let body: serde_json::Value = response.json().await?;
 
-
         if let Some(extrinsics) = body["extrinsics"].as_array() {
             // Check if the array has at least one element
             if !extrinsics.is_empty() {
@@ -29,7 +28,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let decoded = BASE64_STANDARD.decode(first_extrinsic);
                     fs::write(FILE_PATH, decoded.unwrap())?;
                     println!("Data successfully retrieved and saved to '{}'", FILE_PATH);
-
                 } else {
                     println!("The first element of the array is not a string.");
                 }
@@ -39,9 +37,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         } else {
             println!("The value of 'extrinsics' is not an array.");
         }
-
     } else {
-        eprintln!("Failed to retrieve data. HTTP status code: {}", response.status());
+        eprintln!(
+            "Failed to retrieve data. HTTP status code: {}",
+            response.status()
+        );
     }
 
     Ok(())

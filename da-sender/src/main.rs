@@ -1,12 +1,12 @@
+use base64::prelude::*;
+use clap::{Arg, Command};
 use owo_colors::OwoColorize;
+use spinners::{Spinner, Spinners};
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::fs;
-use base64::prelude::*;
 use std::{thread, time};
-use std::env;
-use spinners::{Spinner, Spinners};
-use clap::{Arg, Command};
 
 const FILE_PATH: &str = "data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
@@ -15,11 +15,13 @@ const BLOCK_URL: &str = "http://127.0.0.1:8001/v2/blocks/";
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let matches = Command::new("My App")
-                    .arg(Arg::new("custom-pubdata")
-                        .short('c')
-                        .long("custom-pubdata")
-                        .help("Use da-sender/data/pubdata_storage.json file"))
-                    .get_matches();
+        .arg(
+            Arg::new("custom-pubdata")
+                .short('c')
+                .long("custom-pubdata")
+                .help("Use da-sender/data/pubdata_storage.json file"),
+        )
+        .get_matches();
 
     let use_custom_pubdata = matches.args_present();
 
@@ -47,7 +49,10 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
         print_results(&body);
 
         // Sleeps 60 seconds to wait for data to be processed
-        let mut sp = Spinner::new(Spinners::Aesthetic, "Retrieving more data from the block...".into());
+        let mut sp = Spinner::new(
+            Spinners::Aesthetic,
+            "Retrieving more data from the block...".into(),
+        );
         thread::sleep(time::Duration::from_secs(60));
         sp.stop();
         println!();
@@ -59,7 +64,10 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
             let header_body: serde_json::Value = header_res.json().await?;
             print_block_header(&header_body);
         } else {
-            eprintln!("HTTP request for block header failed with status code: {}", header_res.status());
+            eprintln!(
+                "HTTP request for block header failed with status code: {}",
+                header_res.status()
+            );
         }
     } else {
         eprintln!("HTTP request failed with status code: {}", res.status());
@@ -104,7 +112,7 @@ fn print_results(body: &serde_json::Value) {
 
 fn print_block_header(body: &serde_json::Value) {
     println!();
-    println!("{:#}","Block Information".underline().bold());
+    println!("{:#}", "Block Information".underline().bold());
     println!();
     print!("{:#}", "Block Hash: ".green());
     println!("{:#}", body["hash"]);
@@ -128,19 +136,19 @@ fn print_block_header(body: &serde_json::Value) {
         println!("{}", extension["data_root"]);
 
         if let Some(commitments) = extension["commitments"].as_array() {
-            println!("{}","  Commitments:".white());
+            println!("{}", "  Commitments:".white());
             for commitment in commitments {
                 println!("    {}", commitment);
             }
         }
 
         if let Some(app_lookup) = extension["app_lookup"].as_object() {
-            println!("{}","  App Lookup Information:".white());
-            print!("{}","    Size: ".white());
+            println!("{}", "  App Lookup Information:".white());
+            print!("{}", "    Size: ".white());
             println!("{}", app_lookup["size"]);
 
             if let Some(index) = app_lookup["index"].as_array() {
-                println!("{}","    Index:".white());
+                println!("{}", "    Index:".white());
                 for item in index {
                     if let Some(app_id) = item["appId"].as_u64() {
                         println!("      App ID: {}", app_id);
