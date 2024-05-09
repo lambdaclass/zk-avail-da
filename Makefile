@@ -25,6 +25,11 @@ send-data:
 	cargo build --release && \
 	cargo run --release
 
+send-custom-data:
+	cd da-sender && \
+	cargo build --release && \
+	cargo run --release -- --custom-pubdata true
+
 get-data:
 	cd da-getter && \
 	cargo build --release && \
