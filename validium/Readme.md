@@ -14,17 +14,16 @@ Example for verifying data availability on the Ethereum network can be found in 
 This example queries the Avail for the Merkle proof which is then checked against deployed
 contract [ValidiumContract.sol](contracts%2FValidiumContract.sol).
 
-In order to run these examples, install all necessary dependencies via **npm** 
-and make sure that all variables in **.env** file are populated (`DATA`, `SURI`, etc...), 
+In order to run these examples, install all necessary dependencies via **npm**
+and make sure that all variables in **.env** file are populated (`DATA`, `SURI`, etc...),
 more details in the Avail documentation for [Validiums](https://availproject.github.io/using-avail/validiums#verify-data-availability-on-ethereum).
 
 Running submit data example:
 ```bash
-  node submitData.js
+  npm run submit
 ```
 
 Checking data availability on Ethereum network:
 ```bash
-  node submitProof.js
+  npm run proof
 ```
-

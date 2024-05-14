@@ -5,6 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "submit": "node submitData.js",
+    "proof": "node submitData.js",
     "format": "prettier --write '*.js'",
     "check-format": "prettier --check '*.js'"
   },
