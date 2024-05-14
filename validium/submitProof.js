@@ -46,6 +46,7 @@ async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIn
 }
 
 (async function submitProof() {
+    // connect to Sepolia through Infura but can be used any other available provider
     const sepoliaApi = new ethers.providers.getDefaultProvider("sepolia");
     const availApi = await createApi(process.env.AVAIL_RPC);
 
