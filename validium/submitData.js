@@ -47,6 +47,10 @@ async function getDataRoot(availApi, blockHash) {
     return [header.extension.v1.commitment.dataRoot, header.number];
 }
 
+/**
+ * Dispatching data root will trigger an optimistic bridge which will bridge the data root to the Ethereum network.
+ * Since the bridge is optimistic, it is necessary to wait for 30 minutes before the data root is available on Ethereum.
+ */
 (async function dataRootDispatch() {
     const availApi = await createApi(process.env.AVAIL_RPC);
     const keyring = new Keyring({type: 'sr25519'});

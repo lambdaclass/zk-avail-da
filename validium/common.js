@@ -1,5 +1,10 @@
 import {ApiPromise, WsProvider} from "@polkadot/api";
 
+/**
+ * Creates api instance.
+ *
+ * @param url websocket address
+ */
 export async function createApi(url) {
     const provider = new WsProvider(url)
     return ApiPromise.create({
@@ -144,6 +149,13 @@ export async function createApi(url) {
     });
 }
 
+/**
+ * Sends transaction to Avail.
+ *
+ * @param api instance of the api
+ * @param account sending the transaction
+ * @param tx transaction
+ */
 export async function sendTx(api, sender, tx) {
     return new Promise(async (resolve) => {
         try {
