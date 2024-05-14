@@ -65,21 +65,16 @@ To send pubdata from ZKSync Era to AvailDA, follow these steps:
 make avail-da
 ```
 
-- Clone [ZKSync Era](https://github.com/lambdaclass/zksync-era) repository and switch to the `validium_demo` branch.
+- Clone [ZKSync Era](https://github.com/lambdaclass/zksync-era) repository and switch to the `validium-demo-new-main` branch.
 
 ## Sending Pubdata
 
 ### Step 1: Generate Pubdata
 
-Navigate to the `zksync-era` directory and run one of the following commands based on your preferred Validium mode:
+Navigate to the `zksync-era` directory and run the following command:
 
-For Validium with Calldata:
 ```sh
-make demo_validium_calldata
-```
-For Validium with Blobs:
-```sh
-make demo_validium_blobs
+zk && zk clean --all && zk env dev_validium && zk init --validium-mode && zk server
 ```
 
 ### Step 2: Run Demo Scenario
