@@ -13,13 +13,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Navigate to directory
-        run: cd validium
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: 'validium/package-lock.json'
+      - name: Navigate to directory
+        run: cd validium
       - name: Install dependencies
         run: npm install
       - name: Prettier check
