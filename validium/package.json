@@ -4,6 +4,10 @@
   "description": "Examples of submitting data to Avail and checking data availability on Ethereum network.",
   "main": "index.js",
   "type": "module",
+  "scripts": {
+    "format": "prettier --write '*.js'",
+    "check-format": "prettier --check '*.js'"
+  },
   "keywords": [
     "avail",
     "validium",
@@ -15,5 +19,8 @@
     "@polkadot/keyring": "^12.2.1",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "prettier": "3.2.5"
   }
 }

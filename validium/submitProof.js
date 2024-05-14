@@ -1,10 +1,10 @@
-import {ethers} from "ethers";
-import * as dotenv from 'dotenv'
-import {hexlify} from "ethers/lib/utils.js";
-import {readFileSync} from "fs";
-import {createApi} from "./common.js";
+import { ethers } from "ethers";
+import * as dotenv from "dotenv";
+import { hexlify } from "ethers/lib/utils.js";
+import { readFileSync } from "fs";
+import { createApi } from "./common.js";
 
-dotenv.config()
+dotenv.config();
 
 /**
  * Returns Merkle proof for the particular data.
@@ -16,7 +16,9 @@ dotenv.config()
  */
 async function getProof(availApi, hashBlock, transactionIndex) {
     const daHeader = await availApi.rpc.kate.queryDataProof(transactionIndex, hashBlock);
-    console.log(`Fetched proof from Avail for txn index ${transactionIndex} inside block ${hashBlock}`);
+    console.log(
+        `Fetched proof from Avail for txn index ${transactionIndex} inside block ${hashBlock}`,
+    );
     return daHeader;
 }
 
@@ -34,15 +36,27 @@ async function getProof(availApi, hashBlock, transactionIndex) {
 async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIndex, leafHash) {
     const abi = JSON.parse(readFileSync(process.env.VALIDIYM_ABI_PATH).toString());
     const availContract = new ethers.Contract(process.env.VALIDIUM_ADDRESS, abi, sepoliaApi);
-    return await availContract.checkDataRootMembership(BigInt(blockNumber), proof, BigInt(numberOfLeaves), BigInt(leafIndex), leafHash)
+    return await availContract.checkDataRootMembership(
+        BigInt(blockNumber),
+        proof,
+        BigInt(numberOfLeaves),
+        BigInt(leafIndex),
+        leafHash,
+    );
 }
 
 (async function submitProof() {
-    const sepoliaApi = new ethers.providers.getDefaultProvider("sepolia")
+    const sepoliaApi = new ethers.providers.getDefaultProvider("sepolia");
     const availApi = await createApi(process.env.AVAIL_RPC);
 
-    console.log(`Getting proof for data index ${process.env.TRANSACTION_INDEX} block number ${process.env.BLOCK_NUMBER} and block hash ${process.env.BLOCK_HASH}`)
-    const daHeader = await getProof(availApi, process.env.BLOCK_HASH, process.env.TRANSACTION_INDEX)
+    console.log(
+        `Getting proof for data index ${process.env.TRANSACTION_INDEX} block number ${process.env.BLOCK_NUMBER} and block hash ${process.env.BLOCK_HASH}`,
+    );
+    const daHeader = await getProof(
+        availApi,
+        process.env.BLOCK_HASH,
+        process.env.TRANSACTION_INDEX,
+    );
 
     console.log(`Data Root: ${hexlify(daHeader.root)}`);
     console.log(`Proof: ${daHeader.proof}`);
@@ -50,13 +64,22 @@ async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIn
     console.log(`Leaf index : ${daHeader.leaf_index}`);
     console.log(`Number of leaves: ${daHeader.numberOfLeaves}`);
 
-    const isDataAccepted = await checkProof(sepoliaApi, process.env.BLOCK_NUMBER, daHeader.proof, daHeader.numberOfLeaves, daHeader.leaf_index, daHeader.leaf);
+    const isDataAccepted = await checkProof(
+        sepoliaApi,
+        process.env.BLOCK_NUMBER,
+        daHeader.proof,
+        daHeader.numberOfLeaves,
+        daHeader.leaf_index,
+        daHeader.leaf,
+    );
     console.log("Data is: " + (isDataAccepted ? "available" : "not available"));
 
     await availApi.disconnect();
-})().then(() => {
-    console.log("Done")
-}).catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+})()
+    .then(() => {
+        console.log("Done");
+    })
+    .catch((err) => {
+        console.error(err);
+        process.exit(1);
+    });

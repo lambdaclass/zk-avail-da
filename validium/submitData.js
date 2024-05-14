@@ -1,8 +1,8 @@
-import {Keyring} from "@polkadot/api";
+import { Keyring } from "@polkadot/api";
 import * as dotenv from "dotenv";
-import {createApi, sendTx} from "./common.js";
+import { createApi, sendTx } from "./common.js";
 
-dotenv.config()
+dotenv.config();
 
 /**
  * Submitting data to Avail as a transaction.
@@ -31,7 +31,11 @@ async function dispatchDataRoot(availApi, blockHash, account) {
     const header = await availApi.rpc.chain.getHeader(blockHash);
     console.log(`Block Number: ${header.number}`);
     console.log(`State Root: ${header.stateRoot}`);
-    let tx = await availApi.tx.nomadDABridge.tryDispatchDataRoot(destinationDomain, bridgeRouterEthAddress, header);
+    let tx = await availApi.tx.nomadDABridge.tryDispatchDataRoot(
+        destinationDomain,
+        bridgeRouterEthAddress,
+        header,
+    );
     return await sendTx(availApi, account, tx);
 }
 
@@ -53,14 +57,18 @@ async function getDataRoot(availApi, blockHash) {
  */
 (async function dataRootDispatch() {
     const availApi = await createApi(process.env.AVAIL_RPC);
-    const keyring = new Keyring({type: 'sr25519'});
+    const keyring = new Keyring({
+        type: "sr25519",
+    });
     const account = keyring.addFromMnemonic(process.env.SURI);
-    console.log("Submitting data to Avail...")
+    console.log("Submitting data to Avail...");
 
-    let result = await submitData(availApi, "0", account)
+    let result = await submitData(availApi, "0", account);
     const txIndex = JSON.parse(result.events[0].phase).applyExtrinsic;
     const blockHash = result.status.asInBlock;
-    console.log(`Transaction: ${result.txHash}. Block hash: ${blockHash}. Transaction index: ${txIndex}.`)
+    console.log(
+        `Transaction: ${result.txHash}. Block hash: ${blockHash}. Transaction index: ${txIndex}.`,
+    );
 
     console.log("Triggering Home...");
     result = await dispatchDataRoot(availApi, blockHash, account);
@@ -69,9 +77,11 @@ async function getDataRoot(availApi, blockHash) {
     console.log("Data Root:" + root + " and Block number: " + blockNum);
 
     await availApi.disconnect();
-})().then(() => {
-    console.log("Done")
-}).catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+})()
+    .then(() => {
+        console.log("Done");
+    })
+    .catch((err) => {
+        console.error(err);
+        process.exit(1);
+    });
