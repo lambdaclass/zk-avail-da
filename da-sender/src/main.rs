@@ -3,14 +3,14 @@ use clap::{Arg, Command};
 use owo_colors::OwoColorize;
 use reqwest::ClientBuilder;
 use spinners::{Spinner, Spinners};
-use tokio_retry::strategy::{jitter, ExponentialBackoff};
-use tokio_retry::Retry;
 use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::error::Error;
 use std::fs;
 use std::time::Duration;
 use std::{thread, time};
+use tokio_retry::strategy::{jitter, ExponentialBackoff};
+use tokio_retry::Retry;
 
 const FILE_PATH: &str = "data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
@@ -59,9 +59,8 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
         let retry_strategy = ExponentialBackoff::from_millis(10)
             .map(jitter)
             .take(RETRY_COUNT);
-        let result = Retry::spawn(retry_strategy, || {
-            client.post(SUBMIT_URL).json(&map).send()
-        }).await;
+        let result =
+            Retry::spawn(retry_strategy, || client.post(SUBMIT_URL).json(&map).send()).await;
         sp.stop();
         println!();
         match result {
@@ -71,12 +70,16 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
                     print_results(&body);
                     let mut sp = Spinner::new(
                         Spinners::Aesthetic,
-                        format!("Retrieving more data from the block {}...", &body["block_number"]),
+                        format!(
+                            "Retrieving more data from the block {}...",
+                            &body["block_number"]
+                        ),
                     );
                     thread::sleep(time::Duration::from_secs(60));
                     sp.stop();
                     println!();
-                    let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
+                    let block_header_url =
+                        BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
                     let header_res = client.get(block_header_url).send().await?;
                     if header_res.status().is_success() {
                         let header_body: serde_json::Value = header_res.json().await?;
