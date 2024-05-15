@@ -1,16 +1,21 @@
 use base64::prelude::*;
 use clap::{Arg, Command};
 use owo_colors::OwoColorize;
+use reqwest::ClientBuilder;
 use spinners::{Spinner, Spinners};
+use tokio_retry::strategy::{jitter, ExponentialBackoff};
+use tokio_retry::Retry;
 use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::error::Error;
 use std::fs;
+use std::time::Duration;
 use std::{thread, time};
 
 const FILE_PATH: &str = "data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
 const BLOCK_URL: &str = "http://127.0.0.1:8001/v2/blocks/";
+const RETRY_COUNT: usize = 6;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -32,7 +37,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
     let file_content = read_pubdata(use_custom_pubdata).await?;
     let batches: BTreeMap<String, String> = serde_json::from_str(&file_content)?;
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(60))
+        .build()?;
     for (batch_number, pubdata) in batches {
         println!();
         let mut sp = Spinner::new(
@@ -49,38 +56,44 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
         let base64_content = BASE64_STANDARD.encode(json_string);
         let mut map = HashMap::new();
         map.insert("data", base64_content);
-        let res = client.post(SUBMIT_URL).json(&map).send().await?;
+        let retry_strategy = ExponentialBackoff::from_millis(10)
+            .map(jitter)
+            .take(RETRY_COUNT);
+        let result = Retry::spawn(retry_strategy, || {
+            client.post(SUBMIT_URL).json(&map).send()
+        }).await;
         sp.stop();
         println!();
-        if res.status().is_success() {
-            let body: serde_json::Value = res.json().await?;
-            print_results(&body);
-            // Sleeps 60 seconds to wait for data to be processed
-            let mut sp = Spinner::new(
-                Spinners::Aesthetic,
-                format!(
-                    "Retrieving more data from the block {}...",
-                    &body["block_number"]
-                ),
-            );
-            thread::sleep(time::Duration::from_secs(60));
-            sp.stop();
-            println!();
-            // Perform GET request for block header information
-            let block_header_url =
-                BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
-            let header_res = client.get(block_header_url).send().await?;
-            if header_res.status().is_success() {
-                let header_body: serde_json::Value = header_res.json().await?;
-                print_block_header(&header_body);
-            } else {
-                eprintln!(
-                    "HTTP request for block header failed with status code: {}",
-                    header_res.status()
-                );
+        match result {
+            Ok(res) => {
+                if res.status().is_success() {
+                    let body: serde_json::Value = res.json().await?;
+                    print_results(&body);
+                    let mut sp = Spinner::new(
+                        Spinners::Aesthetic,
+                        format!("Retrieving more data from the block {}...", &body["block_number"]),
+                    );
+                    thread::sleep(time::Duration::from_secs(60));
+                    sp.stop();
+                    println!();
+                    let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
+                    let header_res = client.get(block_header_url).send().await?;
+                    if header_res.status().is_success() {
+                        let header_body: serde_json::Value = header_res.json().await?;
+                        print_block_header(&header_body);
+                    } else {
+                        eprintln!(
+                            "HTTP request for block header failed with status code: {}",
+                            header_res.status()
+                        );
+                    }
+                } else {
+                    eprintln!("HTTP request failed with status code: {}", res.status());
+                }
             }
-        } else {
-            eprintln!("HTTP request failed with status code: {}", res.status());
+            Err(e) => {
+                eprintln!("HTTP request failed after retries: {}", e);
+            }
         }
     }
     // Close the client to prevent resource leaks
