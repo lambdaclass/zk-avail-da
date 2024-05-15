@@ -2,7 +2,7 @@ use base64::prelude::*;
 use clap::{Arg, Command};
 use owo_colors::OwoColorize;
 use spinners::{Spinner, Spinners};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::error::Error;
 use std::fs;
@@ -14,7 +14,7 @@ const BLOCK_URL: &str = "http://127.0.0.1:8001/v2/blocks/";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let matches = Command::new("My App")
+    let matches = Command::new("Pubdata Submitter for AvailDA")
         .arg(
             Arg::new("custom-pubdata")
                 .short('c')
@@ -22,9 +22,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .help("Use da-sender/data/pubdata_storage.json file"),
         )
         .get_matches();
-
     let use_custom_pubdata = matches.args_present();
-
     if let Err(err) = run(use_custom_pubdata).await {
         eprintln!("Error: {}", err);
     }
@@ -32,66 +30,67 @@ async fn main() -> Result<(), Box<dyn Error>> {
 }
 
 async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
-    // Read the content of the file pubdata_storage.json
     let file_content = read_pubdata(use_custom_pubdata).await?;
-
-    // Convert the content to Base64
-    let base64_content = BASE64_STANDARD.encode(file_content);
-
-    let mut map = HashMap::new();
-    map.insert("data", base64_content);
-
+    let batches: BTreeMap<String, String> = serde_json::from_str(&file_content)?;
     let client = reqwest::Client::new();
-    let res = client.post(SUBMIT_URL).json(&map).send().await?;
-
-    if res.status().is_success() {
-        let body: serde_json::Value = res.json().await?;
-        print_results(&body);
-
-        // Sleeps 60 seconds to wait for data to be processed
+    for (batch_number, pubdata) in batches {
+        println!();
         let mut sp = Spinner::new(
             Spinners::Aesthetic,
-            "Retrieving more data from the block...".into(),
+            format!("Sending pubdata from batch #{}...", batch_number),
         );
-        thread::sleep(time::Duration::from_secs(60));
+        let json_string = format!(r#"
+        {{
+            "{}": "{}"
+        }}"#, batch_number, pubdata);
+        let base64_content = BASE64_STANDARD.encode(json_string);
+        let mut map = HashMap::new();
+        map.insert("data", base64_content);
+        let res = client.post(SUBMIT_URL).json(&map).send().await?;
         sp.stop();
         println!();
-
-        // Perform GET request for block header information
-        let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
-        let header_res = client.get(block_header_url).send().await?;
-        if header_res.status().is_success() {
-            let header_body: serde_json::Value = header_res.json().await?;
-            print_block_header(&header_body);
-        } else {
-            eprintln!(
-                "HTTP request for block header failed with status code: {}",
-                header_res.status()
+        if res.status().is_success() {
+            let body: serde_json::Value = res.json().await?;
+            print_results(&body);
+            // Sleeps 60 seconds to wait for data to be processed
+            let mut sp = Spinner::new(
+                Spinners::Aesthetic,
+                format!("Retrieving more data from the block {}...", &body["block_number"]),
             );
+            thread::sleep(time::Duration::from_secs(60));
+            sp.stop();
+            println!();
+            // Perform GET request for block header information
+            let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
+            let header_res = client.get(block_header_url).send().await?;
+            if header_res.status().is_success() {
+                let header_body: serde_json::Value = header_res.json().await?;
+                print_block_header(&header_body);
+            } else {
+                eprintln!(
+                    "HTTP request for block header failed with status code: {}",
+                    header_res.status()
+                );
+            }
+        } else {
+            eprintln!("HTTP request failed with status code: {}", res.status());
         }
-    } else {
-        eprintln!("HTTP request failed with status code: {}", res.status());
     }
-
     // Close the client to prevent resource leaks
     drop(client);
-
     Ok(())
 }
 
 async fn read_pubdata(use_custom_pubdata: bool) -> Result<String, Box<dyn Error>> {
     let zksync_home = env::var("ZKSYNC_HOME")
         .map_err(|_| "The ZKSYNC_HOME environment variable is not defined.")?;
-
     let file_path = if use_custom_pubdata {
         // Use FILE_PATH directly if --pubdata-storage flag is present
         FILE_PATH.to_string()
     } else {
         format!("{}/da_manager_example/{}", zksync_home, FILE_PATH)
     };
-
     let file_content = fs::read_to_string(file_path)?;
-
     Ok(file_content)
 }
 
@@ -134,19 +133,16 @@ fn print_block_header(body: &serde_json::Value) {
         println!("{}", extension["cols"]);
         print!("{}", "  Data Root: ".white());
         println!("{}", extension["data_root"]);
-
         if let Some(commitments) = extension["commitments"].as_array() {
             println!("{}", "  Commitments:".white());
             for commitment in commitments {
                 println!("    {}", commitment);
             }
         }
-
         if let Some(app_lookup) = extension["app_lookup"].as_object() {
             println!("{}", "  App Lookup Information:".white());
             print!("{}", "    Size: ".white());
             println!("{}", app_lookup["size"]);
-
             if let Some(index) = app_lookup["index"].as_array() {
                 println!("{}", "    Index:".white());
                 for item in index {
