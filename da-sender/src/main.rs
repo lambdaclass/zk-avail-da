@@ -39,10 +39,13 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
             Spinners::Aesthetic,
             format!("Sending pubdata from batch #{}...", batch_number),
         );
-        let json_string = format!(r#"
+        let json_string = format!(
+            r#"
         {{
             "{}": "{}"
-        }}"#, batch_number, pubdata);
+        }}"#,
+            batch_number, pubdata
+        );
         let base64_content = BASE64_STANDARD.encode(json_string);
         let mut map = HashMap::new();
         map.insert("data", base64_content);
@@ -55,13 +58,17 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
             // Sleeps 60 seconds to wait for data to be processed
             let mut sp = Spinner::new(
                 Spinners::Aesthetic,
-                format!("Retrieving more data from the block {}...", &body["block_number"]),
+                format!(
+                    "Retrieving more data from the block {}...",
+                    &body["block_number"]
+                ),
             );
             thread::sleep(time::Duration::from_secs(60));
             sp.stop();
             println!();
             // Perform GET request for block header information
-            let block_header_url = BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
+            let block_header_url =
+                BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
             let header_res = client.get(block_header_url).send().await?;
             if header_res.status().is_success() {
                 let header_body: serde_json::Value = header_res.json().await?;
