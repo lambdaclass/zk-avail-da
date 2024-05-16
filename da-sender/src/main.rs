@@ -8,7 +8,6 @@ use std::env;
 use std::error::Error;
 use std::fs;
 use std::time::Duration;
-use std::{thread, time};
 use tokio_retry::strategy::{jitter, ExponentialBackoff};
 use tokio_retry::Retry;
 
@@ -16,6 +15,9 @@ const FILE_PATH: &str = "data/pubdata_storage.json";
 const SUBMIT_URL: &str = "http://127.0.0.1:8001/v2/submit";
 const BLOCK_URL: &str = "http://127.0.0.1:8001/v2/blocks/";
 const RETRY_COUNT: usize = 6;
+
+#[derive(Debug)]
+struct ServerError(reqwest::Error);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -36,7 +38,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
     let file_content = read_pubdata(use_custom_pubdata).await?;
-    let batches: BTreeMap<String, String> = serde_json::from_str(&file_content)?;
+    let batches: BTreeMap<u32, String> = serde_json::from_str(&file_content)?;
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(60))
         .build()?;
@@ -75,23 +77,50 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
                             &body["block_number"]
                         ),
                     );
-                    thread::sleep(time::Duration::from_secs(60));
-                    sp.stop();
-                    println!();
                     let block_header_url =
                         BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
-                    let header_res = client.get(block_header_url).send().await?;
-                    if header_res.status().is_success() {
-                        let header_body: serde_json::Value = header_res.json().await?;
-                        print_block_header(&header_body);
-                    } else {
-                        eprintln!(
-                            "HTTP request for block header failed with status code: {}",
-                            header_res.status()
-                        );
+                    let retry_strategy = ExponentialBackoff::from_millis(10)
+                        .map(jitter)
+                        .take(RETRY_COUNT);
+                    let header_result = Retry::spawn(retry_strategy, {
+                        let client = client.clone();
+                        let block_header_url = block_header_url.clone();
+                        move || {
+                            let client = client.clone();
+                            let block_header_url = block_header_url.clone();
+                            async move {
+                                let res = client.get(&block_header_url).send().await;
+                                match res {
+                                    Ok(response) => {
+                                        if response.status().is_server_error() {
+                                            Err(ServerError(response.error_for_status().unwrap_err()))
+                                        } else {
+                                            Ok(response)
+                                        }
+                                    },
+                                    Err(err) => Err(ServerError(err)),
+                                }
+                            }
+                        }
+                    }).await;
+                    sp.stop();
+                    println!();
+                    match header_result {
+                        Ok(header_res) => {
+                            if header_res.status().is_success() {
+                                let header_body: serde_json::Value = header_res.json().await?;
+                                print_block_header(&header_body);
+                            } else {
+                                eprintln!(
+                                    "HTTP request for block header failed with status code: {}",
+                                    header_res.status()
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("HTTP request failed after retries: {:?}", e);
+                        }
                     }
-                } else {
-                    eprintln!("HTTP request failed with status code: {}", res.status());
                 }
             }
             Err(e) => {
