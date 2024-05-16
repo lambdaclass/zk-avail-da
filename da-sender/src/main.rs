@@ -1,7 +1,7 @@
 use base64::prelude::*;
 use clap::{Arg, Command};
 use owo_colors::OwoColorize;
-use reqwest::ClientBuilder;
+use reqwest::{Client, ClientBuilder};
 use spinners::{Spinner, Spinners};
 use std::collections::{BTreeMap, HashMap};
 use std::env;
@@ -43,93 +43,102 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(60))
         .build()?;
     for (batch_number, pubdata) in batches {
-        println!();
-        let mut sp = Spinner::new(
-            Spinners::Aesthetic,
-            format!("Sending pubdata from batch #{}...", batch_number),
-        );
-        let json_string = format!(
-            r#"
-        {{
-            "{}": "{}"
-        }}"#,
-            batch_number, pubdata
-        );
-        let base64_content = BASE64_STANDARD.encode(json_string);
-        let mut map = HashMap::new();
-        map.insert("data", base64_content);
-        let retry_strategy = ExponentialBackoff::from_millis(10)
-            .map(jitter)
-            .take(RETRY_COUNT);
-        let result =
-            Retry::spawn(retry_strategy, || client.post(SUBMIT_URL).json(&map).send()).await;
-        sp.stop();
-        println!();
-        match result {
-            Ok(res) => {
-                if res.status().is_success() {
-                    let body: serde_json::Value = res.json().await?;
-                    print_results(&body);
-                    let mut sp = Spinner::new(
-                        Spinners::Aesthetic,
-                        format!(
-                            "Retrieving more data from the block {}...",
-                            &body["block_number"]
-                        ),
-                    );
-                    let block_header_url =
-                        BLOCK_URL.to_owned() + &body["block_number"].to_string() + "/header";
-                    let retry_strategy = ExponentialBackoff::from_millis(10)
-                        .map(jitter)
-                        .take(RETRY_COUNT);
-                    let header_result = Retry::spawn(retry_strategy, {
-                        let client = client.clone();
-                        let block_header_url = block_header_url.clone();
-                        move || {
-                            let client = client.clone();
-                            let block_header_url = block_header_url.clone();
-                            async move {
-                                let res = client.get(&block_header_url).send().await;
-                                match res {
-                                    Ok(response) => {
-                                        if response.status().is_server_error() {
-                                            Err(ServerError(response.error_for_status().unwrap_err()))
-                                        } else {
-                                            Ok(response)
-                                        }
-                                    },
-                                    Err(err) => Err(ServerError(err)),
-                                }
-                            }
-                        }
-                    }).await;
-                    sp.stop();
-                    println!();
-                    match header_result {
-                        Ok(header_res) => {
-                            if header_res.status().is_success() {
-                                let header_body: serde_json::Value = header_res.json().await?;
-                                print_block_header(&header_body);
-                            } else {
-                                eprintln!(
-                                    "HTTP request for block header failed with status code: {}",
-                                    header_res.status()
-                                );
-                            }
-                        }
-                        Err(e) => {
-                            eprintln!("HTTP request failed after retries: {:?}", e);
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                eprintln!("HTTP request failed after retries: {}", e);
+        process_batch(batch_number, pubdata, &client).await?;
+    }
+    Ok(())
+}
+
+async fn process_batch(batch_number: u32, pubdata: String, client: &Client) -> Result<(), Box<dyn Error>> {
+    println!();
+    let mut sp = Spinner::new(
+        Spinners::Aesthetic,
+        format!("Sending pubdata from batch #{}...", batch_number),
+    );
+    let json_string = format!(
+        r#"
+    {{
+        "{}": "{}"
+    }}"#,
+        batch_number, pubdata
+    );
+    let base64_content = BASE64_STANDARD.encode(json_string);
+    let mut map = HashMap::new();
+    map.insert("data", base64_content);
+
+    let retry_strategy = ExponentialBackoff::from_millis(10)
+        .map(jitter)
+        .take(RETRY_COUNT);
+
+    let result = Retry::spawn(retry_strategy, || client.post(SUBMIT_URL).json(&map).send()).await;
+    sp.stop();
+    println!();
+
+    match result {
+        Ok(res) => {
+            if res.status().is_success() {
+                let body: serde_json::Value = res.json().await?;
+                print_results(&body);
+                retrieve_block_header(&body["block_number"], client).await?;
             }
         }
+        Err(e) => {
+            eprintln!("HTTP request failed after retries: {}", e);
+        }
     }
-    // Close the client to prevent resource leaks
-    drop(client);
+    Ok(())
+}
+
+async fn retrieve_block_header(block_number: &serde_json::Value, client: &Client) -> Result<(), Box<dyn Error>> {
+    let mut sp = Spinner::new(
+        Spinners::Aesthetic,
+        format!("Retrieving more data from the block {}...", block_number),
+    );
+    let block_header_url = BLOCK_URL.to_owned() + &block_number.to_string() + "/header";
+
+    let retry_strategy = ExponentialBackoff::from_millis(10)
+        .map(jitter)
+        .take(RETRY_COUNT);
+
+    let header_result = Retry::spawn(retry_strategy, {
+        let client = client.clone();
+        let block_header_url = block_header_url.clone();
+        move || {
+            let client = client.clone();
+            let block_header_url = block_header_url.clone();
+            async move {
+                let res = client.get(&block_header_url).send().await;
+                match res {
+                    Ok(response) => {
+                        if response.status().is_server_error() {
+                            Err(ServerError(response.error_for_status().unwrap_err()))
+                        } else {
+                            Ok(response)
+                        }
+                    }
+                    Err(err) => Err(ServerError(err)),
+                }
+            }
+        }
+    }).await;
+    sp.stop();
+    println!();
+
+    match header_result {
+        Ok(header_res) => {
+            if header_res.status().is_success() {
+                let header_body: serde_json::Value = header_res.json().await?;
+                print_block_header(&header_body);
+            } else {
+                eprintln!(
+                    "HTTP request for block header failed with status code: {}",
+                    header_res.status()
+                );
+            }
+        }
+        Err(e) => {
+            eprintln!("HTTP request failed after retries: {:?}", e);
+        }
+    }
     Ok(())
 }
 
