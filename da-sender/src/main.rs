@@ -82,7 +82,12 @@ async fn process_batch(
             if res.status().is_success() {
                 let body: serde_json::Value = res.json().await?;
                 print_results(&body);
-                retrieve_block_header(&body["block_number"], client).await?;
+                retrieve_block_header(
+                    &body["block_number"],
+                    // body["index"].as_str().unwrap(),
+                    client,
+                )
+                .await?;
             }
         }
         Err(e) => {
@@ -94,6 +99,7 @@ async fn process_batch(
 
 async fn retrieve_block_header(
     block_number: &serde_json::Value,
+    // index: &str,
     client: &Client,
 ) -> Result<(), Box<dyn Error>> {
     let mut sp = Spinner::new(
@@ -136,6 +142,7 @@ async fn retrieve_block_header(
             if header_res.status().is_success() {
                 let header_body: serde_json::Value = header_res.json().await?;
                 print_block_header(&header_body);
+                // submit_validium(&header_body, index)?;
             } else {
                 eprintln!(
                     "HTTP request for block header failed with status code: {}",
@@ -147,6 +154,37 @@ async fn retrieve_block_header(
             eprintln!("HTTP request failed after retries: {:?}", e);
         }
     }
+    Ok(())
+}
+
+fn _submit_validium(header_body: &serde_json::Value, index: &str) -> Result<(), Box<dyn Error>> {
+    let nodejs_app_path = "../../validium/app.js";
+    let block_hash = header_body["hash"].as_str().unwrap_or("");
+    let block_number = header_body["number"].as_u64().unwrap_or(0).to_string(); // Converted to String
+
+    println!();
+    let mut sp = Spinner::new(
+        Spinners::Aesthetic,
+        "Submitting data to Validium Contract...".to_string(),
+    );
+
+    let output = std::process::Command::new("node run submit")
+        .arg(nodejs_app_path)
+        .arg(&block_number)
+        .arg(block_hash)
+        .arg(index)
+        .output()?;
+
+    if !output.status.success() {
+        eprintln!("NodeJS app failed with status: {}", output.status);
+        eprintln!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+    } else {
+        println!(
+            "NodeJS app output: {}",
+            String::from_utf8_lossy(&output.stdout)
+        );
+    }
+    sp.stop();
     Ok(())
 }
 

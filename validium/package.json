@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "submit": "node submitData.js",
-    "proof": "node submitData.js",
+    "proof": "node submitProof.js",
     "format": "prettier --write '*.js'",
     "check-format": "prettier --check '*.js'"
   },
