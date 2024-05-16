@@ -48,7 +48,11 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn process_batch(batch_number: u32, pubdata: String, client: &Client) -> Result<(), Box<dyn Error>> {
+async fn process_batch(
+    batch_number: u32,
+    pubdata: String,
+    client: &Client,
+) -> Result<(), Box<dyn Error>> {
     println!();
     let mut sp = Spinner::new(
         Spinners::Aesthetic,
@@ -88,7 +92,10 @@ async fn process_batch(batch_number: u32, pubdata: String, client: &Client) -> R
     Ok(())
 }
 
-async fn retrieve_block_header(block_number: &serde_json::Value, client: &Client) -> Result<(), Box<dyn Error>> {
+async fn retrieve_block_header(
+    block_number: &serde_json::Value,
+    client: &Client,
+) -> Result<(), Box<dyn Error>> {
     let mut sp = Spinner::new(
         Spinners::Aesthetic,
         format!("Retrieving more data from the block {}...", block_number),
@@ -119,7 +126,8 @@ async fn retrieve_block_header(block_number: &serde_json::Value, client: &Client
                 }
             }
         }
-    }).await;
+    })
+    .await;
     sp.stop();
     println!();
 
