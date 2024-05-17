@@ -13,6 +13,15 @@ dotenv.config();
  * @returns {Promise<unknown>}
  */
 async function submitData(availApi, data, account) {
+    console.log("Submitting Data...");
+    // Retrieve the chain name
+    const chain = await availApi.rpc.system.chain();
+    console.log(`rpc chain = ${chain}`);
+    // Retrieve the latest header
+    const lastHeader = await availApi.rpc.chain.getHeader();
+
+    // Log the information
+    console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`);
     let submit = await availApi.tx.dataAvailability.submitData(data);
     return await sendTx(availApi, account, submit);
 }
@@ -64,6 +73,8 @@ async function getDataRoot(availApi, blockHash) {
     console.log("Submitting data to Avail...");
 
     let result = await submitData(availApi, "0", account);
+    console.log("Data Submitted!");
+
     const txIndex = JSON.parse(result.events[0].phase).applyExtrinsic;
     const blockHash = result.status.asInBlock;
     console.log(

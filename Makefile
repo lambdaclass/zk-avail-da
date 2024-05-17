@@ -40,3 +40,5 @@ format:
 	cargo fmt
 	cd da-getter && \
 	cargo fmt
+	cd validium && \
+	npm run format
