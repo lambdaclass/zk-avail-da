@@ -11,95 +11,129 @@ export async function createApi(url) {
         provider,
         rpc: {
             kate: {
-                queryAppData: {
-                    params: [
-                        {
-                            name: "app_id",
-                            type: "AppId",
-                        },
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "Vec<Vec<u8>>",
-                },
-                queryDataProof: {
-                    description: "Generate the data proof for the given `index`",
-                    params: [
-                        {
-                            name: "transaction_index",
-                            type: "u32",
-                        },
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "DataProof",
-                },
-                queryDataProofV2: {
-                    description: "Generate the data proof for the given `index`",
-                    params: [
-                        {
-                            name: "transaction_index",
-                            type: "u32",
-                        },
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "DataProof",
+                blockLength: {
+                  description: "Get Block Length",
+                  params: [
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "BlockLength",
                 },
                 queryProof: {
-                    description: "Generate the kate proof for the given `cells`",
-                    params: [
-                        {
-                            name: "cells",
-                            type: "Vec<Cell>",
-                        },
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "Vec<u8>",
+                  description: "Generate the kate proof for the given `cells`",
+                  params: [
+                    {
+                      name: "cells",
+                      type: "Vec<Cell>",
+                    },
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "Vec<u8>",
+                },
+                queryDataProof: {
+                  description: "Generate the data proof for the given `index`",
+                  params: [
+                    {
+                      name: "data_index",
+                      type: "u32",
+                    },
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "DataProof",
+                },
+                queryDataProofV2: {
+                  description: "Generate the data proof for the given `transaction_index`",
+                  params: [
+                    {
+                      name: "transaction_index",
+                      type: "u32",
+                    },
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "ProofResponse",
+                },
+                queryAppData: {
+                  description: "Fetches app data rows for the given app",
+                  params: [
+                    {
+                      name: "app_id",
+                      type: "AppId",
+                    },
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "Vec<Option<Vec<u8>>>",
                 },
                 queryRows: {
-                    description: "Query rows based on their indices",
-                    params: [
-                        {
-                            name: "rows",
-                            type: "Vec<u32>",
-                        },
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "Vec<Vec<U256>>",
+                  description: "Query rows based on their indices",
+                  params: [
+                    {
+                      name: "rows",
+                      type: "Vec<u32>",
+                    },
+                    {
+                      name: "at",
+                      type: "Hash",
+                      isOptional: true,
+                    },
+                  ],
+                  type: "Vec<Vec<u8>>",
                 },
-                blockLength: {
-                    description: "Get Block Length",
-                    params: [
-                        {
-                            name: "at",
-                            type: "Hash",
-                            isOptional: true,
-                        },
-                    ],
-                    type: "BlockLength",
-                },
-            },
+              },
         },
         types: {
             AppId: "Compact<u32>",
+            DataProofV2: {
+                dataRoot: "H256",
+                blobRoot: "H256",
+                bridgeRoot: "H256",
+                proof: "Vec<H256>",
+                numberOfLeaves: "Compact<u32>",
+                leafIndex: "Compact<u32>",
+                leaf: "H256",
+            },
+            DaHeader: {
+                parentHash: "Hash",
+                number: "Compact<BlockNumber>",
+                stateRoot: "Hash",
+                extrinsicsRoot: "Hash",
+                digest: "Digest",
+                extension: "HeaderExtension",
+              },
+            Message: {
+                messageType: "MessageType",
+                from: "H256",
+                to: "H256",
+                originDomain: "u32",
+                destinationDomain: "u32",
+                data: "Vec<u8>",
+                id: "u64",
+              },
+              MessageType: {
+                _enum: ["ArbitraryMessage", "FungibleToken"],
+              },
+            ProofResponse: {
+                dataProof: "DataProofV2",
+                message: "Option<Message>",
+            },
             DataLookupIndexItem: {
                 appId: "AppId",
                 start: "Compact<u32>",

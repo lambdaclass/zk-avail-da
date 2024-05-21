@@ -1,6 +1,5 @@
-import { ethers } from "ethers";
+import { ethers, hexlify } from "ethers";
 import * as dotenv from "dotenv";
-import { hexlify } from "ethers/lib/utils.js";
 import { readFileSync } from "fs";
 import { createApi } from "./common.js";
 
@@ -14,8 +13,8 @@ dotenv.config();
  * @param transactionIndex Index of the transaction in the block
  * @returns {Promise<*>}
  */
-async function getProof(availApi, hashBlock, transactionIndex) {
-    const daHeader = await availApi.rpc.kate.queryDataProof(transactionIndex, hashBlock);
+export async function getProof(availApi, hashBlock, transactionIndex) {
+    const daHeader = await availApi.rpc.kate.queryDataProofV2(transactionIndex, hashBlock);
     console.log(
         `Fetched proof from Avail for txn index ${transactionIndex} inside block ${hashBlock}`,
     );
@@ -33,7 +32,7 @@ async function getProof(availApi, hashBlock, transactionIndex) {
  * @param leafHash Hash of the leaf in the Merkle tree
  * @returns {Promise<*>}
  */
-async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIndex, leafHash) {
+export async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIndex, leafHash) {
     const abi = JSON.parse(readFileSync(process.env.VALIDIYM_ABI_PATH).toString());
     const availContract = new ethers.Contract(process.env.VALIDIUM_ADDRESS, abi, sepoliaApi);
     return await availContract.checkDataRootMembership(
@@ -45,7 +44,7 @@ async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIn
     );
 }
 
-(async function submitProof() {
+export async function submitProof() {
     // connect to Sepolia through Infura but can be used any other available provider
     const sepoliaApi = new ethers.providers.getDefaultProvider("sepolia");
     const availApi = await createApi(process.env.AVAIL_RPC);
@@ -76,11 +75,4 @@ async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIn
     console.log("Data is: " + (isDataAccepted ? "available" : "not available"));
 
     await availApi.disconnect();
-})()
-    .then(() => {
-        console.log("Done");
-    })
-    .catch((err) => {
-        console.error(err);
-        process.exit(1);
-    });
+}
