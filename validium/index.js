@@ -5,27 +5,20 @@ import { ethers, hexlify } from "ethers";
 import { checkProof, getProof } from "./submitProof.js";
 
 const availApi = await createApi("ws://127.0.0.1:9944");
-const blockHash = "0xef43e13a88b8968837dba31b637c389ddda84fcc674d0de24e73bcd64e02cfc0"
-const dataRoot = await getDataRoot(
-    availApi,
-    blockHash
-);
+const blockHash = "0xef43e13a88b8968837dba31b637c389ddda84fcc674d0de24e73bcd64e02cfc0";
+const dataRoot = await getDataRoot(availApi, blockHash);
 
 const { block } = JSON.parse(await availApi.rpc.chain.getBlock(blockHash));
 const transactionIndex = block.header.extension.v2.appLookup.index[0].appId;
 const blockNumber = block.header.number;
 
-console.log(`Block = ${JSON.stringify(block)}`)
+console.log(`Block = ${JSON.stringify(block)}`);
 
 const sepoliaApi = new ethers.getDefaultProvider("sepolia");
 console.log(
     `Getting proof for data index ${transactionIndex} block number ${blockNumber} and block hash ${blockHash}`,
 );
-const daHeader = await getProof(
-    availApi,
-    blockHash,
-    transactionIndex,
-);
+const daHeader = await getProof(availApi, blockHash, transactionIndex);
 
 console.log(`Da Header: ${JSON.stringify(daHeader)}`);
 

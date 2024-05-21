@@ -32,7 +32,14 @@ export async function getProof(availApi, hashBlock, transactionIndex) {
  * @param leafHash Hash of the leaf in the Merkle tree
  * @returns {Promise<*>}
  */
-export async function checkProof(sepoliaApi, blockNumber, proof, numberOfLeaves, leafIndex, leafHash) {
+export async function checkProof(
+    sepoliaApi,
+    blockNumber,
+    proof,
+    numberOfLeaves,
+    leafIndex,
+    leafHash,
+) {
     const abi = JSON.parse(readFileSync(process.env.VALIDIYM_ABI_PATH).toString());
     const availContract = new ethers.Contract(process.env.VALIDIUM_ADDRESS, abi, sepoliaApi);
     return await availContract.checkDataRootMembership(
