@@ -40,6 +40,21 @@ export async function createApi(url) {
                     ],
                     type: "DataProof",
                 },
+                queryDataProofV2: {
+                    description: "Generate the data proof for the given `index`",
+                    params: [
+                        {
+                            name: "transaction_index",
+                            type: "u32",
+                        },
+                        {
+                            name: "at",
+                            type: "Hash",
+                            isOptional: true,
+                        },
+                    ],
+                    type: "DataProof",
+                },
                 queryProof: {
                     description: "Generate the kate proof for the given `cells`",
                     params: [
@@ -54,6 +69,21 @@ export async function createApi(url) {
                         },
                     ],
                     type: "Vec<u8>",
+                },
+                queryRows: {
+                    description: "Query rows based on their indices",
+                    params: [
+                        {
+                            "name": "rows",
+                            "type": "Vec<u32>"
+                        },
+                        {
+                            "name": "at",
+                            "type": "Hash",
+                            "isOptional": true
+                        }
+                    ],
+                    type: "Vec<Vec<U256>>"
                 },
                 blockLength: {
                     description: "Get Block Length",
@@ -95,9 +125,11 @@ export async function createApi(url) {
             },
             HeaderExtension: {
                 _enum: {
+                    V1: "V1HeaderExtension",
+                    V2: "V1HeaderExtension",
                     V3: "V1HeaderExtension",
                     VTest: "VTHeaderExtension",
-                },
+                }
             },
             DaHeader: {
                 parentHash: "Hash",

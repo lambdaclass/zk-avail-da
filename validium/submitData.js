@@ -10,7 +10,7 @@ import { createApi, sendTx } from "./common.js";
 
 dotenv.config();
 
-async function generateAccount() {
+export async function generateAccount() {
     // const mnemonic = mnemonicGenerate();
     // console.log(`Generated Mnemonic: ${mnemonic}`);
     // const keyring = new Keyring({ type: "sr25519" });
@@ -48,7 +48,7 @@ async function generateAccount() {
  * @param maxRetries maximum number of retries
  * @returns {Promise&lt;unknown&gt;}
  */
-async function submitData(availApi, data, account, maxRetries = 3) {
+export async function submitData(availApi, data, account, maxRetries = 3) {
     let attempt = 0;
     let lastError = null;
 
@@ -112,23 +112,23 @@ async function dispatchDataRoot(availApi, blockHash, account) {
  * @param blockHash hash of the block
  * @returns {Promise<(*)[]>}
  */
-async function getDataRoot(availApi, blockHash) {
+export async function getDataRoot(availApi, blockHash) {
     const header = JSON.parse(await availApi.rpc.chain.getHeader(blockHash));
-    return [header.extension.v1.commitment.dataRoot, header.number];
+    console.log(`dataRoot = ${JSON.stringify(header)}`)
+    return [header.extension.v2.commitment.dataRoot, header.number];
 }
 
 /**
  * Dispatching data root will trigger an optimistic bridge which will bridge the data root to the Ethereum network.
  * Since the bridge is optimistic, it is necessary to wait for 30 minutes before the data root is available on Ethereum.
  */
-(async function dataRootDispatch() {
+export async function dataRootDispatch() {
     try {
         const availApi = await createApi(process.env.AVAIL_RPC);
         const keyring = new Keyring({
             type: "sr25519",
         });
         const account = keyring.addFromMnemonic(process.env.SURI);
-        console.log("Submitting data to Avail...");
         //const account = await generateAccount();
 
         console.log(`Account address: ${account.address}`);
@@ -150,11 +150,4 @@ async function getDataRoot(availApi, blockHash) {
         console.error("Error in dataRootDispatch:", error);
         process.exit(1);
     }
-})()
-    .then(() => {
-        console.log("Done");
-    })
-    .catch((err) => {
-        console.error(err);
-        process.exit(1);
-    });
+}
