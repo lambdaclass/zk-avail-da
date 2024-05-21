@@ -114,7 +114,7 @@ async function dispatchDataRoot(availApi, blockHash, account) {
  */
 export async function getDataRoot(availApi, blockHash) {
     const header = JSON.parse(await availApi.rpc.chain.getHeader(blockHash));
-    console.log(`dataRoot = ${JSON.stringify(header)}`)
+    console.log(`dataRoot = ${JSON.stringify(header)}`);
     return [header.extension.v2.commitment.dataRoot, header.number];
 }
 

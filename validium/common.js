@@ -74,16 +74,16 @@ export async function createApi(url) {
                     description: "Query rows based on their indices",
                     params: [
                         {
-                            "name": "rows",
-                            "type": "Vec<u32>"
+                            name: "rows",
+                            type: "Vec<u32>",
                         },
                         {
-                            "name": "at",
-                            "type": "Hash",
-                            "isOptional": true
-                        }
+                            name: "at",
+                            type: "Hash",
+                            isOptional: true,
+                        },
                     ],
-                    type: "Vec<Vec<U256>>"
+                    type: "Vec<Vec<U256>>",
                 },
                 blockLength: {
                     description: "Get Block Length",
@@ -129,7 +129,7 @@ export async function createApi(url) {
                     V2: "V1HeaderExtension",
                     V3: "V1HeaderExtension",
                     VTest: "VTHeaderExtension",
-                }
+                },
             },
             DaHeader: {
                 parentHash: "Hash",
