@@ -95,7 +95,7 @@ export async function createApi(url) {
             },
             HeaderExtension: {
                 _enum: {
-                    V2: "V1HeaderExtension",
+                    V3: "V1HeaderExtension",
                     VTest: "VTHeaderExtension",
                 },
             },

@@ -40,31 +40,49 @@ async function generateAccount() {
 }
 
 /**
- * Submitting data to Avail as a transaction.
+ * Submitting data to Avail as a transaction with retry logic.
  *
  * @param availApi api instance
  * @param data payload to send
  * @param account that is sending transaction
- * @returns {Promise<unknown>}
+ * @param maxRetries maximum number of retries
+ * @returns {Promise&lt;unknown&gt;}
  */
-async function submitData(availApi, data, account) {
-    try {
-        console.log("Submitting Data...");
-        const chain = await availApi.rpc.system.chain();
-        const lastHeader = await availApi.rpc.chain.getHeader();
-        console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`);
+async function submitData(availApi, data, account, maxRetries = 3) {
+    let attempt = 0;
+    let lastError = null;
 
-        let submit = await availApi.tx.dataAvailability.submitData(data);
-        console.log(`Submit = ${submit}`);
+    while (attempt < maxRetries) {
+        try {
+            console.log("Submitting Data...");
+            const chain = await availApi.rpc.system.chain();
+            const lastHeader = await availApi.rpc.chain.getHeader();
+            console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`);
 
-        console.log("Send Tx...");
-        const result = await sendTx(availApi, account, submit);
-        return result;
-    } catch (error) {
-        console.error("Error in submitData:", error);
-        throw error;
+            let submit = await availApi.tx.dataAvailability.submitData(data);
+            console.log(`Submit = ${submit}`);
+
+            console.log("Send Tx...");
+            const result = await sendTx(availApi, account, submit);
+            return result;
+        } catch (error) {
+            lastError = error;
+            console.error(`Error in submitData attempt ${attempt + 1}:`, error);
+
+            // Check if the error is related to BadProof and should be retried
+            if (error.message.includes("Invalid Transaction: Transaction has a bad signature")) {
+                console.log("Bad signature detected, retrying...");
+                attempt++;
+                await new Promise(resolve => setTimeout(resolve, 2000)); // wait for 2 seconds before retrying
+            } else {
+                throw error; // rethrow if the error is not related to BadProof
+            }
+        }
     }
+
+    throw new Error(`Failed to submit data after ${maxRetries} attempts: ${lastError.message}`);
 }
+
 
 /**
  * Sending dispatch data root transaction.
@@ -107,12 +125,12 @@ async function getDataRoot(availApi, blockHash) {
 (async function dataRootDispatch() {
     try {
         const availApi = await createApi(process.env.AVAIL_RPC);
-        // const keyring = new Keyring({
-        //     type: "sr25519",
-        // });
-        // const account = keyring.addFromMnemonic(process.env.SURI);
-        // console.log("Submitting data to Avail...");
-        const account = await generateAccount();
+        const keyring = new Keyring({
+            type: "sr25519",
+        });
+        const account = keyring.addFromMnemonic(process.env.SURI);
+        console.log("Submitting data to Avail...");
+        //const account = await generateAccount();
 
         console.log(`Account address: ${account.address}`);
         console.log(`Account details: ${JSON.stringify(account)}`);
