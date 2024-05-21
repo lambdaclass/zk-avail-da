@@ -73,7 +73,7 @@ async function submitData(availApi, data, account, maxRetries = 3) {
             if (error.message.includes("Invalid Transaction: Transaction has a bad signature")) {
                 console.log("Bad signature detected, retrying...");
                 attempt++;
-                await new Promise(resolve => setTimeout(resolve, 2000)); // wait for 2 seconds before retrying
+                await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for 2 seconds before retrying
             } else {
                 throw error; // rethrow if the error is not related to BadProof
             }
@@ -82,7 +82,6 @@ async function submitData(availApi, data, account, maxRetries = 3) {
 
     throw new Error(`Failed to submit data after ${maxRetries} attempts: ${lastError.message}`);
 }
-
 
 /**
  * Sending dispatch data root transaction.
