@@ -171,7 +171,7 @@ fn submit_validium(
     println!();
     let mut sp = Spinner::new(
         Spinners::Aesthetic,
-        "Submitting data to Validium Contract...".to_string(),
+        "Getting Proof from Validium Contract...".to_string(),
     );
 
     // println!(
