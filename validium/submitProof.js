@@ -2,8 +2,13 @@ import { ethers, hexlify } from "ethers";
 import * as dotenv from "dotenv";
 import { readFileSync } from "fs";
 import { createApi } from "./common.js";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Returns Merkle proof for the particular data.
@@ -34,14 +39,19 @@ export async function getProof(availApi, hashBlock, transactionIndex) {
  */
 export async function checkProof(
     sepoliaApi,
+    contractAddress,
+    contractAbiPath,
     blockNumber,
     proof,
     numberOfLeaves,
     leafIndex,
     leafHash,
 ) {
-    const abi = JSON.parse(readFileSync(process.env.VALIDIYM_ABI_PATH).toString());
-    const availContract = new ethers.Contract(process.env.VALIDIUM_ADDRESS, abi, sepoliaApi);
+    console.log(`Contract Address = ${contractAddress}`);
+    console.log(`Contract Abi Path = ${contractAddress}`);
+    console.log(`Current Path = ${__dirname}`);
+    const abi = JSON.parse(readFileSync(`${__dirname}/${contractAbiPath}`).toString());
+    const availContract = new ethers.Contract(contractAddress, abi, sepoliaApi);
     return await availContract.checkDataRootMembership(
         BigInt(blockNumber),
         proof,
@@ -71,15 +81,15 @@ export async function submitProof() {
     console.log(`Leaf index : ${daHeader.leaf_index}`);
     console.log(`Number of leaves: ${daHeader.numberOfLeaves}`);
 
-    const isDataAccepted = await checkProof(
-        sepoliaApi,
-        process.env.BLOCK_NUMBER,
-        daHeader.proof,
-        daHeader.numberOfLeaves,
-        daHeader.leaf_index,
-        daHeader.leaf,
-    );
-    console.log("Data is: " + (isDataAccepted ? "available" : "not available"));
+    // const isDataAccepted = await checkProof(
+    //     sepoliaApi,
+    //     process.env.BLOCK_NUMBER,
+    //     daHeader.proof,
+    //     daHeader.numberOfLeaves,
+    //     daHeader.leaf_index,
+    //     daHeader.leaf,
+    // );
+    // console.log("Data is: " + (isDataAccepted ? "available" : "not available"));
 
     await availApi.disconnect();
 }
