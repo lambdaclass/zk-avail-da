@@ -165,31 +165,40 @@ fn submit_validium(
     let block_hash = header_body["hash"].as_str().unwrap_or("");
     let block_number = header_body["number"].as_u64().unwrap_or(0).to_string(); // Converted to String
     let block_index = index.as_u64().unwrap_or(0).to_string();
+    let contract_address = "0xA06386C65B1f56De57CE6aB9CeEB2552fa811529";
+    let contract_abi_path = "abi/ValidiumContract.json";
 
     println!();
     let mut sp = Spinner::new(
         Spinners::Aesthetic,
         "Submitting data to Validium Contract...".to_string(),
     );
-    // println!("DEBUG {:#} {:#} {:#}", &block_number, block_hash, &block_index);
+
+    println!(
+        "DEBUG {:#} {:#} {:#}",
+        &block_number, block_hash, &block_index
+    );
 
     let output = std::process::Command::new("node")
         .arg(nodejs_app_path_str)
         .arg(block_hash)
         .arg(&block_number)
         .arg(block_index)
+        .arg(contract_address)
+        .arg(contract_abi_path)
         .output()?;
 
     if !output.status.success() {
-        eprintln!("NodeJS app failed with status: {}", output.status);
-        eprintln!("stderr: {}", String::from_utf8_lossy(&output.stderr));
-    } else {
+        println!("\nNodeJS app failed with status: {}", output.status);
         println!(
-            "NodeJS app output: {}",
-            String::from_utf8_lossy(&output.stdout)
+            "stderr: {:#}",
+            String::from_utf8_lossy(&output.stderr).to_string().red()
         );
     }
+    println!("\n{:#}\n", "NodeJS app output:".cyan());
+    println!("{}", String::from_utf8_lossy(&output.stdout));
     sp.stop();
+    println!();
     Ok(())
 }
 

@@ -3,11 +3,16 @@ import { createApi } from "./common.js";
 import { generateAccount, getDataRoot, submitData } from "./submitData.js";
 import { ethers, hexlify } from "ethers";
 import { checkProof, getProof } from "./submitProof.js";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const availApi = await createApi("ws://127.0.0.1:9944");
 const blockHash = process.argv[2];
-const blockNumber = process.argv[3];
-const transactionIndex = process.argv[4];
+const blockNumber = +process.argv[3];
+const transactionIndex = +process.argv[4];
+const contractAddress = process.argv[5];
+const contractAbiPath = process.argv[6];
 const sepoliaApi = new ethers.getDefaultProvider("sepolia");
 
 console.log(
@@ -25,6 +30,8 @@ console.log(`Da Header: ${JSON.stringify(daHeader)}`);
 
 const isDataAccepted = await checkProof(
     sepoliaApi,
+    contractAddress,
+    contractAbiPath,
     blockNumber,
     daHeader.dataProof.proof,
     daHeader.dataProof.numberOfLeaves,
