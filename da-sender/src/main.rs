@@ -174,10 +174,10 @@ fn submit_validium(
         "Submitting data to Validium Contract...".to_string(),
     );
 
-    println!(
-        "DEBUG {:#} {:#} {:#}",
-        &block_number, block_hash, &block_index
-    );
+    // println!(
+    //     "DEBUG {:#} {:#} {:#}",
+    //     &block_number, block_hash, &block_index
+    // );
 
     let output = std::process::Command::new("node")
         .arg(nodejs_app_path_str)
@@ -195,7 +195,7 @@ fn submit_validium(
             String::from_utf8_lossy(&output.stderr).to_string().red()
         );
     }
-    println!("\n{:#}\n", "NodeJS app output:".cyan());
+    println!("\n\n{:#}", "NodeJS app output:".cyan());
     println!("{}", String::from_utf8_lossy(&output.stdout));
     sp.stop();
     println!();
