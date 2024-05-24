@@ -9,15 +9,18 @@ async function main() {
     const api = await ApiPromise.create({ provider: wsProvider });
 
     const keyring = new Keyring({ type: "sr25519" });
-    const accountJson = JSON.parse(readFileSync(`account.json`, 'utf8'));
+    const accountJson = JSON.parse(readFileSync(`account.json`, "utf8"));
     const password = process.env.ACCOUNT_PASSWORD;
     const account = keyring.addFromJson(accountJson);
     account.unlock(password);
 
-    const transfer = api.tx.balances.transfer("5CK5iPZwjuos9szMbqP3RPSfeHxGJ7SCUe4FkWovH4EHy852", 1);
+    const transfer = api.tx.balances.transfer(
+        "5CK5iPZwjuos9szMbqP3RPSfeHxGJ7SCUe4FkWovH4EHy852",
+        1,
+    );
     const hash = await transfer.signAndSend(account);
 
-    console.log('Transfer sent with hash', hash.toHex());
+    console.log("Transfer sent with hash", hash.toHex());
 
     await api.disconnect();
 }

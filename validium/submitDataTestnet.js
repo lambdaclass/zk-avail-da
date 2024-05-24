@@ -30,7 +30,7 @@ const { block } = JSON.parse(await availApi.rpc.chain.getBlock(blockHash));
 const transactionIndex = block.header.extension.v2.appLookup.index[0].appId;
 const blockNumber = block.header.number;
 
-console.log(`Block = ${JSON.stringify(block)}`)
+console.log(`Block = ${JSON.stringify(block)}`);
 
 console.log(
     `Getting proof for data index ${transactionIndex} block number ${blockNumber} and block hash ${blockHash}`,
