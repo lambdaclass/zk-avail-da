@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "validium": "deno run --allow-read --allow-net validium.ts"
+  }
+}

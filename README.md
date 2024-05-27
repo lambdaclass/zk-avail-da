@@ -53,6 +53,10 @@ Response:
 {"status":"finished","confidence":93.75}
 ```
 
+### Explorer
+
+You can use an explorer by accessing [this URL](https://explorer.avail.so/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer).
+
 # Sending ZKSync Era Pubdata to AvailDA
 
 To send pubdata from ZKSync Era to AvailDA, follow these steps:
