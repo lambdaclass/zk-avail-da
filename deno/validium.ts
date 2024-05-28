@@ -10,7 +10,7 @@ const env = await load();
 const AVAIL_RPC = env["AVAIL_RPC"];
 const SURI = env["SURI"];
 const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
-const DATA = ""; // data to send
+const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = ""; // eth provider url
 const availApi = await ApiPromise.create({
@@ -67,6 +67,7 @@ async function submitData(availApi, data, account) {
 let result = await submitData(availApi, DATA, account);
 if (result.isFinalized) {
     console.log(`DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`);
+    console.log(`result submitData = ${JSON.stringify(result)}`);
 }
 
 // wait until the chain head on the Ethereum network is updated with the block range
@@ -89,6 +90,7 @@ while (true) {
     if (lastCommittedBlock >= blockNumber) {
         console.log("Fetching the blob proof.")
         const proofResponse = await fetch(BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" + result.txIndex);
+        console.log(proofResponse.url)
         if (proofResponse.status != 200) {
             console.log("Something went wrong fetching the proof.")
             console.log(proofResponse)

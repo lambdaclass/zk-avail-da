@@ -1,6 +1,8 @@
 # Validium Deno Script
 
-A Deno script that uses PolkadotSDK to submit data and get proof of its availability in AvailDA. Using Turing testnet.
+A Deno script that uses PolkadotSDK to submit data and get proof of its availability in AvailDA.
+
+Using the [Avail's Bridge API](https://github.com/availproject/bridge-api) (running locally) and [Vector X's contracts](https://github.com/succinctlabs/vectorx?tab=readme-ov-file) of [Succinct](https://blog.succinct.xyz/vector-x/) with Turing Testnet.
 
 ## Requirements
 
