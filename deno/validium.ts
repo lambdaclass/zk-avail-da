@@ -11,7 +11,7 @@ const AVAIL_RPC = env["AVAIL_RPC"];
 const SURI = env["SURI"];
 const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
 const DATA = ""; // data to send
-const BRIDGE_API_URL = ""; // bridge api url
+const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = ""; // eth provider url
 const availApi = await ApiPromise.create({
     provider: new WsProvider(AVAIL_RPC),
@@ -75,11 +75,17 @@ while (true) {
     let getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
     if (getHeadRsp.status != 200) {
         console.log("Something went wrong fetching the head.");
+        console.log("Status:", getHeadRsp.status);
+        console.log("Status Text:", getHeadRsp.statusText);
+        console.log("Headers:", Array.from(getHeadRsp.headers.entries()));
+        const responseBody = await getHeadRsp.text();
+        console.log("Response Body:", responseBody);
         break;
     }
     let headRsp = await getHeadRsp.json();
     let blockNumber: number = result.blockNumber.toNumber();
     let lastCommittedBlock: number = headRsp.data.end;
+    console.log(`lastCommittedBlock = ${lastCommittedBlock}, blockNumber = ${blockNumber} => ${blockNumber - lastCommittedBlock} blocks left`);
     if (lastCommittedBlock >= blockNumber) {
         console.log("Fetching the blob proof.")
         const proofResponse = await fetch(BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" + result.txIndex);
