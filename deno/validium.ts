@@ -4,6 +4,7 @@ import {ISubmittableResult} from "https://deno.land/x/polkadot@0.2.45/types/type
 import {ethers} from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from './abi/availbridge.json' with {type: "json"};
+import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
 
 const env = await load();
 
@@ -26,14 +27,30 @@ const account = new Keyring({type: "sr25519"}).addFromUri(SURI);
  *  the blob verification.
  */
 class ProofData {
-    dataRootProof: Array<string>
-    leafProof: string
-    rangeHash: string
-    dataRootIndex: number
-    blobRoot: string
-    bridgeRoot: string
-    leaf: string
-    leafIndex: number
+    dataRootProof: Array<string> | undefined
+    leafProof: string | undefined
+    rangeHash: string | undefined
+    dataRootIndex: number | undefined
+    blobRoot: string | undefined
+    bridgeRoot: string | undefined
+    leaf: string | undefined
+    leafIndex: number | undefined
+}
+
+interface Event {
+    phase: { applyExtrinsic: number };
+    event: { index: string; data: Array<string | { weight: { refTime: number; proofSize: number }; class: string; paysFee: string }> };
+    topics: Array<any>;
+}
+
+interface DispatchInfo {
+    weight: { refTime: number; proofSize: number };
+    class: string;
+    paysFee: string;
+}
+
+interface SubmitDataResult extends ISubmittableResult {
+    blockNumber: string;
 }
 
 /**
@@ -42,29 +59,30 @@ class ProofData {
  * @param availApi api instance
  * @param data payload to send
  * @param account that is sending transaction
- * @returns {Promise<unknown>}
+ * @returns {Promise<SubmitDataResult>}
  */
-async function submitData(availApi, data, account) {
-    return await new Promise<ISubmittableResult>((res) => {
-        console.log("Sending transaction...")
-        availApi.tx.dataAvailability.submitData(data).signAndSend(account, {nonce: -1}, (result: ISubmittableResult) => {
-            console.log(`Tx status: ${result.status}`)
+async function submitData(availApi: ApiPromise, data: string, account: KeyringPair): Promise<SubmitDataResult> {
+    return new Promise<SubmitDataResult>((res) => {
+        console.log("Sending transaction...");
+        availApi.tx.dataAvailability.submitData(data).signAndSend(account, { nonce: -1 }, (result: ISubmittableResult) => {
+            console.log(`Tx status: ${result.status}`);
             if (result.isError) {
                 console.log(`Tx failed!`);
-                res(result)
+                res(result as any);
             }
             if (result.isInBlock) {
-                console.log("Transaction in block, waiting for block finalization...")
+                console.log("Transaction in block, waiting for block finalization...");
             }
             if (result.isFinalized) {
-                console.log(`Tx finalized.`)
-                res(result)
+                console.log(`Tx finalized.`);
+                res(result as any);
             }
-        })
+        });
     });
 }
 
-let result = await submitData(availApi, DATA, account);
+
+let result: SubmitDataResult = await submitData(availApi, DATA, account);
 if (result.isFinalized) {
     console.log(`DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`);
     console.log(`result submitData = ${JSON.stringify(result)}`);

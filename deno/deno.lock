@@ -599,6 +599,7 @@
     "https://deno.land/x/polkadot@0.2.45/keyring/pairs.ts": "9b2d21905593e3a13be94e91d34396db2cd0a80e8a7fc46f6be0920c4428deb0",
     "https://deno.land/x/polkadot@0.2.45/keyring/testing.ts": "942e917987c05ad4c9067c9dcaa9d154a8bf30ddebe1a474ff69df515aa73755",
     "https://deno.land/x/polkadot@0.2.45/keyring/testingPairs.ts": "9dd9a1f7c69886a370b81f026847edd08ce65b82563c7ee5dcc28469437dc4d9",
+    "https://deno.land/x/polkadot@0.2.45/keyring/types.ts": "6e3741891742ffc555849c3ced95a64ee3bfdfbc2ee61c1d3d7961908c2ebf70",
     "https://deno.land/x/polkadot@0.2.45/networks/defaults/genesis.ts": "42dccdc8e29d8be0b97d090bc821263326f3078c6f1a2cb8004bc6b8b88dee52",
     "https://deno.land/x/polkadot@0.2.45/networks/defaults/icons.ts": "3c0077b9744cc69d6da26b199f6d7173e39a684074b05663f7a87eb09450b6e4",
     "https://deno.land/x/polkadot@0.2.45/networks/defaults/index.ts": "19b390f17994392f7121c022f2c2ab6b2538b31d5ceaa2ac106c277ed62ad072",
