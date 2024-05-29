@@ -14,7 +14,7 @@ SUCCINCT_URL=https://beaconapi.succinct.xyz/api/integrations/vectorx
 AVAIL_CHAIN_NAME=turing
 CONTRACT_CHAIN_ID=11155111
 VECTORX_CONTRACT_ADDRESS=0xe542db219a7e2b29c7aeaeace242c9a2cd528f96
-BRIDGE_CONTRACT_ADDRESS=0x1369a4c9391cf90d393b40faead521b0f7019dc5 # Currently failing
+BRIDGE_CONTRACT_ADDRESS=0x1369a4c9391cf90d393b40faead521b0f7019dc5
 ETHEREUM_CLIENT_URL=https://ethereum-sepolia.publicnode.com
 BEACONCHAIN_URL=https://sepolia.beaconcha.in/api/v1/slot
 HOST=0.0.0.0
@@ -27,8 +27,9 @@ AVAIL_RPC=wss://turing-rpc.avail.so/ws # ws://127.0.0.1:9944
 # mnemonic of the account to sign transactions on Avail network
 SURI='your phrase'
 # main devnet DA contract address
-DA_BRIDGE_ADDRESS=
+DA_BRIDGE_ADDRESS=0x967F7DdC4ec508462231849AE81eeaa68Ad01389
 BRIDGE_API_URL=http://localhost:8080
+ETH_PROVIDER_URL=https://ethereum-sepolia.rpc.subquery.network/public
 ```
 
 ## Run
@@ -43,7 +44,7 @@ Submit the data to the Turing Testnet DA:
 ```ts
 const result: SubmitDataResult = await submitData(availApi, DATA, account);
 ```
-When finished, makes requests to the Bridge API asking for the [Sepolia block range](https://beaconapi.succinct.xyz/api/integrations/vectorx/range?contractChainId=11155111&contractAddress=0xe542db219a7e2b29c7aeaeace242c9a2cd528f96) using [this](https://sepolia.etherscan.io/address/0xe542db219a7e2b29c7aeaeace242c9a2cd528f96) using this contract to get the proof of our submitted block.
+When finished, make requests to the Bridge API asking for the [Sepolia block range](https://beaconapi.succinct.xyz/api/integrations/vectorx/range?contractChainId=11155111&contractAddress=0xe542db219a7e2b29c7aeaeace242c9a2cd528f96) using [this](https://sepolia.etherscan.io/address/0xe542db219a7e2b29c7aeaeace242c9a2cd528f96) contract to get the proof of our submitted block.
 ```ts
 const getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
 const headRsp = await getHeadRsp.json();
@@ -58,7 +59,7 @@ Once our block is in Sepolia's range. We can get the proof:
 ```ts
 const proofResponse = await fetch(BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" + result.txIndex);
 ```
-And call the Bridge contract verification function:
+And call the [Bridge contract verification function](https://docs.availproject.org/docs/build-with-avail/Validium/reference):
 ```ts
 const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
 const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
@@ -72,6 +73,12 @@ const isVerified = await contractInstance.verifyBlobLeaf([
     proof.leaf,
     proof.leafIndex]
 );
+```
+
+## Test proof
+
+```sh
+deno task test-verify-proof
 ```
 
 ## Faucet

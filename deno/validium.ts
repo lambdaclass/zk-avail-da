@@ -13,7 +13,7 @@ const SURI = env["SURI"];
 const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
 const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
-const ETH_PROVIDER_URL = ""; // eth provider url
+const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
 const availApi = await ApiPromise.create({
     provider: new WsProvider(AVAIL_RPC),
     rpc: API_RPC,
