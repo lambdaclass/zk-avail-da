@@ -26,6 +26,7 @@ const account = new Keyring({type: "sr25519"}).addFromUri(SURI);
  *  ProofData represents a response from the api that holds proof for
  *  the blob verification.
  */
+// deno-lint-ignore no-unused-vars
 class ProofData {
     dataRootProof: Array<string> | undefined
     leafProof: string | undefined
@@ -35,18 +36,6 @@ class ProofData {
     bridgeRoot: string | undefined
     leaf: string | undefined
     leafIndex: number | undefined
-}
-
-interface Event {
-    phase: { applyExtrinsic: number };
-    event: { index: string; data: Array<string | { weight: { refTime: number; proofSize: number }; class: string; paysFee: string }> };
-    topics: Array<any>;
-}
-
-interface DispatchInfo {
-    weight: { refTime: number; proofSize: number };
-    class: string;
-    paysFee: string;
 }
 
 interface SubmitDataResult extends ISubmittableResult {
@@ -61,7 +50,7 @@ interface SubmitDataResult extends ISubmittableResult {
  * @param account that is sending transaction
  * @returns {Promise<SubmitDataResult>}
  */
-async function submitData(availApi: ApiPromise, data: string, account: KeyringPair): Promise<SubmitDataResult> {
+function submitData(availApi: ApiPromise, data: string, account: KeyringPair): Promise<SubmitDataResult> {
     return new Promise<SubmitDataResult>((res) => {
         console.log("Sending transaction...");
         availApi.tx.dataAvailability.submitData(data).signAndSend(account, { nonce: -1 }, (result: ISubmittableResult) => {
@@ -82,7 +71,7 @@ async function submitData(availApi: ApiPromise, data: string, account: KeyringPa
 }
 
 
-let result: SubmitDataResult = await submitData(availApi, DATA, account);
+const result: SubmitDataResult = await submitData(availApi, DATA, account);
 if (result.isFinalized) {
     console.log(`DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`);
     console.log(`result submitData = ${JSON.stringify(result)}`);
@@ -91,7 +80,7 @@ if (result.isFinalized) {
 // wait until the chain head on the Ethereum network is updated with the block range
 // in which the Avail DA transaction is included.
 while (true) {
-    let getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
+    const getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
     if (getHeadRsp.status != 200) {
         console.log("Something went wrong fetching the head.");
         console.log("Status:", getHeadRsp.status);
@@ -101,9 +90,9 @@ while (true) {
         console.log("Response Body:", responseBody);
         break;
     }
-    let headRsp = await getHeadRsp.json();
-    let blockNumber: number = result.blockNumber.toNumber();
-    let lastCommittedBlock: number = headRsp.data.end;
+    const headRsp = await getHeadRsp.json();
+    const blockNumber: number = Number(result.blockNumber);
+    const lastCommittedBlock: number = headRsp.data.end;
     console.log(`lastCommittedBlock = ${lastCommittedBlock}, blockNumber = ${blockNumber} => ${blockNumber - lastCommittedBlock} blocks left`);
     if (lastCommittedBlock >= blockNumber) {
         console.log("Fetching the blob proof.")
@@ -114,7 +103,7 @@ while (true) {
             console.log(proofResponse)
             break;
         }
-        let proof: ProofData = await proofResponse.json();
+        const proof: ProofData = await proofResponse.json();
         console.log("Proof fetched:")
         console.log(proof);
         // call the deployed contract verification function with the inclusion proof.

@@ -5,3 +5,4 @@ da-sender/data/pubdata_storage.json
 validium/.env
 account.json
 deno/.env
+.vscode/
