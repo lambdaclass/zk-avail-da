@@ -75,10 +75,10 @@ const isVerified = await contractInstance.verifyBlobLeaf([
 );
 ```
 
-## Test proof
+## Testing
 
 ```sh
-deno task test-verify-proof
+deno task test
 ```
 
 ## Faucet

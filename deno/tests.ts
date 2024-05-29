@@ -1,14 +1,17 @@
-import {ethers} from "npm:ethers@5.4";
+import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import ABI from './abi/availbridge.json' with {type: "json"};
 
-const env = await load();
+Deno.test("verifyBlobLeaf function should return expected result", async () => {
+  const env = await load();
 
-const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"];
-const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"];
-const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
-const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
-const proof = {
+  const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"];
+  const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"];
+  const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
+  const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
+
+  const proof = {
     blobRoot: "0xe882a0dd840cc7b99d5f9ff05216be547c7b7d84a61d474353c4d9cb90cb2cdd",
     blockHash: "0x098913259fd804a4fc099bca18a282aa3b4acdcf8595f046c88ad2c32a39c5cd",
     bridgeRoot: "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -31,8 +34,9 @@ const proof = {
     leafProof: [],
     message: null,
     rangeHash: "0xfbab0eb809f03a99ee5dcca7f4131b6b8a8b56eccbee8f439cd33145d2d14e1d"
-  }
-const isVerified = await contractInstance.verifyBlobLeaf([
+  };
+
+  const isVerified = await contractInstance.verifyBlobLeaf([
     proof.dataRootProof,
     proof.leafProof,
     proof.rangeHash,
@@ -40,6 +44,11 @@ const isVerified = await contractInstance.verifyBlobLeaf([
     proof.blobRoot,
     proof.bridgeRoot,
     proof.leaf,
-    proof.leafIndex]
-);
-console.log(`Blob validation is: ${isVerified}`)
+    proof.leafIndex
+  ]);
+
+  console.log(`Blob validation is: ${isVerified}`);
+
+  const expectedValue = true;
+  assertEquals(isVerified, expectedValue);
+});
