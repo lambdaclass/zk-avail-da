@@ -7,7 +7,7 @@ Using the [Avail's Bridge API](https://github.com/availproject/bridge-api) (runn
 ## Requirements
 
 - [Deno](https://deno.com/)
-- [Avail's Bridge API](https://github.com/availproject/bridge-api) running locally and configured with the following `.env` into his project:
+- [Avail's Bridge API](https://github.com/availproject/bridge-api) running locally and configured with the following `.env` in its directory:
 ```
 AVAIL_CLIENT_URL=https://turing-rpc.avail.so/rpc
 SUCCINCT_URL=https://beaconapi.succinct.xyz/api/integrations/vectorx
