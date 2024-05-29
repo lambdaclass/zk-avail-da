@@ -37,7 +37,7 @@ BRIDGE_API_URL=http://localhost:8080
 deno task validium
 ```
 
-## What do?
+## What does?
 
 Submit the data to the Turing Testnet DA:
 ```ts
