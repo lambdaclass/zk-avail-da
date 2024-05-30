@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    environment: testing
     steps:
       - name: Git Checkout Deno Module
         uses: actions/checkout@v2
@@ -20,9 +20,8 @@ jobs:
 
       - name: Set up .env
         run: |
-          cd deno
-          echo ${{ secrets.ENV}} >> .env
-          cat .env
+          touch deno/.env
+          echo ${{ secrets.ENV }} >> deno/.env
       - name: Run tests
         run: |
           cd deno && deno task test
