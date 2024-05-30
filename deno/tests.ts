@@ -1,11 +1,30 @@
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
+import {
+  ApiPromise,
+  Keyring,
+  WsProvider,
+} from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
+import { API_EXTENSIONS, API_RPC, API_TYPES } from "./api_options.ts";
+import { ISubmittableResult } from "https://deno.land/x/polkadot@0.2.45/types/types/extrinsic.ts";
 import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
+import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
+
+const env = await load();
+
+Deno.test("Load environment variables", () => {
+  assert(env["AVAIL_RPC"], "AVAIL_RPC should be defined");
+  assert(env["SURI"], "SURI should be defined");
+  assert(env["DA_BRIDGE_ADDRESS"], "DA_BRIDGE_ADDRESS should be defined");
+  assert(env["BRIDGE_API_URL"], "BRIDGE_API_URL should be defined");
+  assert(env["ETH_PROVIDER_URL"], "ETH_PROVIDER_URL should be defined");
+});
 
 Deno.test("verifyBlobLeaf function should return expected result", async () => {
-  const env = await load();
-
   const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"];
   const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"];
   const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
