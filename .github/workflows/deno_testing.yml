@@ -20,8 +20,10 @@ jobs:
 
       - name: Set up .env
         run: |
-          touch deno/.env
-          echo ${{ secrets.ENV }} >> deno/.env
+          cd deno
+          echo "${{ secrets.ETH_PROVIDER_URL }}" > .env
+          echo "DA_BRIDGE_ADDRESS=${{ secrets.DA_BRIDGE_ADDRESS }}" >> .env
+        shell: bash
       - name: Run tests
         run: |
           cd deno && deno task test
