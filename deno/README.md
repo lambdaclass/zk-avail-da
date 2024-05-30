@@ -4,7 +4,7 @@ A Deno script that uses PolkadotSDK to submit data and get proof of its
 availability in AvailDA.
 
 Using the [Avail's Bridge API](https://github.com/availproject/bridge-api)
-(running locally) and
+(of [Turing](https://turing-bridge-api.fra.avail.so)) and
 [Vector X's contracts](https://github.com/succinctlabs/vectorx?tab=readme-ov-file)
 of [Succinct](https://blog.succinct.xyz/vector-x/) with Turing Testnet.
 
@@ -15,32 +15,13 @@ of [Succinct](https://blog.succinct.xyz/vector-x/) with Turing Testnet.
 ## Requirements
 
 - [Deno](https://deno.com/)
-- [Avail's Bridge API](https://github.com/availproject/bridge-api) running
-  locally and configured with the following `.env` in its directory:
-
-```
-AVAIL_CLIENT_URL=https://turing-rpc.avail.so/rpc
-SUCCINCT_URL=https://beaconapi.succinct.xyz/api/integrations/vectorx
-AVAIL_CHAIN_NAME=turing
-CONTRACT_CHAIN_ID=11155111
-VECTORX_CONTRACT_ADDRESS=0xe542db219a7e2b29c7aeaeace242c9a2cd528f96
-BRIDGE_CONTRACT_ADDRESS=0x1369a4c9391cf90d393b40faead521b0f7019dc5
-ETHEREUM_CLIENT_URL=https://ethereum-sepolia.publicnode.com
-BEACONCHAIN_URL=https://sepolia.beaconcha.in/api/v1/slot
-HOST=0.0.0.0
-PORT=8080
-```
-
 - A `.env` file:
 
 ```
-# avail rpc endpoint devnet/testnet
-AVAIL_RPC=wss://turing-rpc.avail.so/ws # ws://127.0.0.1:9944
-# mnemonic of the account to sign transactions on Avail network
+AVAIL_RPC=wss://turing-rpc.avail.so/ws
 SURI='your phrase'
-# main devnet DA contract address
 DA_BRIDGE_ADDRESS=0x967F7DdC4ec508462231849AE81eeaa68Ad01389
-BRIDGE_API_URL=http://localhost:8080
+BRIDGE_API_URL=https://turing-bridge-api.fra.avail.so
 ETH_PROVIDER_URL=https://ethereum-sepolia.rpc.subquery.network/public
 ```
 
