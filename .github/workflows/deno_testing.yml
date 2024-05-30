@@ -1,0 +1,29 @@
+name: Deno Testing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: testing
+    steps:
+      - name: Git Checkout Deno Module
+        uses: actions/checkout@v2
+      - name: Use Deno Version
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: v1.x
+
+      - name: Set up .env
+        run: |
+          cd deno
+          echo "ETH_PROVIDER_URL=${{ secrets.ETH_PROVIDER_URL }}" > .env
+          echo "DA_BRIDGE_ADDRESS=${{ secrets.DA_BRIDGE_ADDRESS }}" >> .env
+        shell: bash
+      - name: Run tests
+        run: |
+          cd deno && deno task test
