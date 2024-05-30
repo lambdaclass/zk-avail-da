@@ -32,13 +32,21 @@ const account = new Keyring({ type: "sr25519" }).addFromUri(SURI);
  */
 // deno-lint-ignore no-unused-vars
 class ProofData {
+  // proof of inclusion for the data root
   dataRootProof: Array<string> | undefined;
+  // proof of inclusion of leaf within blob/bridge root
   leafProof: string | undefined;
+  // abi.encodePacked(startBlock, endBlock) of header range commitment on VectorX
   rangeHash: string | undefined;
+  // index of the data root in the commitment tree
   dataRootIndex: number | undefined;
+  // blob root to check proof against, or reconstruct the data root
   blobRoot: string | undefined;
+  // bridge root to check proof against, or reconstruct the data root
   bridgeRoot: string | undefined;
+  // leaf being proven
   leaf: string | undefined;
+  // index of the leaf in the blob/bridge root tree
   leafIndex: number | undefined;
 }
 
