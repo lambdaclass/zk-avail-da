@@ -8,6 +8,7 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
 
   const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"];
   const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"];
+  console.log(`BRIDGE_ADDRESS = ${BRIDGE_ADDRESS}, ETH_PROVIDER_URL = ${ETH_PROVIDER_URL}`);
   const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
   const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
 
