@@ -100,3 +100,13 @@ You can retrieve AVAIL tokens from [this website](https://faucet.avail.tools/).
 
 You can check the block using [Subscan](https://avail-turing.subscan.io/) or
 [Avail Explorer](https://explorer.avail.so).
+
+## References
+
+This script is based on the following articles and resources:
+
+- [Avail's Bridge API Documentation](https://github.com/availproject/bridge-api)
+- [Vector X Contracts](https://github.com/succinctlabs/vectorx?tab=readme-ov-file)
+  by Succinct
+- [Succinct Blog on Vector X](https://blog.succinct.xyz/vector-x/)
+- [Validium Reference Documentation](https://docs.availproject.org/docs/build-with-avail/Validium/reference)
