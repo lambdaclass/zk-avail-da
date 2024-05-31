@@ -2,17 +2,9 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  ApiPromise,
-  Keyring,
-  WsProvider,
-} from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
-import { API_EXTENSIONS, API_RPC, API_TYPES } from "./api_options.ts";
-import { ISubmittableResult } from "https://deno.land/x/polkadot@0.2.45/types/types/extrinsic.ts";
 import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
-import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
 
 const env = await load();
 
