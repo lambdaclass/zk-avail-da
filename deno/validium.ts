@@ -77,17 +77,7 @@ function submitData(
   });
 }
 
-export async function submitDataAndVerify() {
-  const availApi = await initializeAvailApi(AVAIL_RPC);
-  const account = createAccount(SURI);
-  const result: SubmitDataResult = await submitData(availApi, DATA, account);
-  if (result.isFinalized) {
-    console.log(
-      `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
-    );
-    console.log(`result submitData = ${JSON.stringify(result)}`);
-  }
-
+export async function proofAndVerify(result: SubmitDataResult) {
   // wait until the chain head on the Ethereum network is updated with the block range
   // in which the Avail DA transaction is included.
   while (true) {
@@ -151,7 +141,19 @@ export async function submitDataAndVerify() {
     // wait for 1 minute to check again
     await new Promise((f) => setTimeout(f, 60 * 1000));
   }
+}
 
+export async function submitDataAndVerify() {
+  const availApi = await initializeAvailApi(AVAIL_RPC);
+  const account = createAccount(SURI);
+  const result: SubmitDataResult = await submitData(availApi, DATA, account);
+  if (result.isFinalized) {
+    console.log(
+      `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
+    );
+    console.log(`result submitData = ${JSON.stringify(result)}`);
+  }
+  await proofAndVerify(result);
   Deno.exit(0);
 }
 
