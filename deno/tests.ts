@@ -63,5 +63,5 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
 });
 
 Deno.test("submitDataAndVerify", async () => {
-  await submitDataAndVerify();
+  await submitDataAndVerify("a");
 });

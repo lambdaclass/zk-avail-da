@@ -1,3 +1,10 @@
 import { submitDataAndVerify } from "./validium.ts";
 
-await submitDataAndVerify();
+const data = Deno.args[0];
+
+if (data) {
+  await submitDataAndVerify(data);
+} else {
+  console.error("No data provided");
+  Deno.exit(1);
+}

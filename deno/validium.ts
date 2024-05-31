@@ -11,7 +11,6 @@ const env = await load();
 const AVAIL_RPC = env["AVAIL_RPC"];
 const SURI = env["SURI"];
 const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
-const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
 
@@ -158,10 +157,10 @@ export async function proofAndVerify(result: SubmitDataResult) {
   }
 }
 
-export async function submitDataAndVerify() {
+export async function submitDataAndVerify(data: string) {
   const availApi = await initializeAvailApi(AVAIL_RPC);
   const account = createAccount(SURI);
-  const result: SubmitDataResult = await submitData(availApi, DATA, account);
+  const result: SubmitDataResult = await submitData(availApi, data, account);
   if (result.isFinalized) {
     console.log(
       `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
