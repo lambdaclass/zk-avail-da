@@ -51,7 +51,7 @@ interface SubmitDataResult extends ISubmittableResult {
  * @param account that is sending transaction
  * @returns {Promise<SubmitDataResult>}
  */
-function submitData(
+export function submitData(
   availApi: ApiPromise,
   data: string,
   account: KeyringPair,

@@ -5,6 +5,7 @@ import {
 import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
+import { submitDataAndVerify } from "./validium.ts";
 
 const env = await load();
 
@@ -68,4 +69,8 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
 
   const expectedValue = true;
   assertEquals(isVerified, expectedValue);
+});
+
+Deno.test("submitDataAndVerify", async () => {
+  await submitDataAndVerify();
 });
