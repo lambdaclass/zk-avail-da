@@ -43,8 +43,62 @@ async fn run(use_custom_pubdata: bool) -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(60))
         .build()?;
     for (batch_number, pubdata) in batches {
-        process_batch(batch_number, pubdata, &client).await?;
+        process_batch_validium(batch_number, pubdata).await?;
     }
+    Ok(())
+}
+
+async fn submit_and_verify_proof_validium(data: String, sp: &mut Spinner) -> Result<(), Box<dyn Error>> {
+    let current_dir = env::current_dir()?;
+    let deno_dir = current_dir.parent()
+        .expect("zk-avail-da")
+        .join("deno");
+
+    println!();
+    let output = tokio::process::Command::new("deno")
+        .arg("task")
+        .arg("validium")
+        .arg(data)
+        .current_dir(&deno_dir)
+        .output()
+        .await?;
+
+    if !output.status.success() {
+        println!("\nDeno app failed with status: {}", output.status);
+        println!(
+            "stderr: {:#}",
+            String::from_utf8_lossy(&output.stderr).to_string().red()
+        );
+    }
+    println!("\n\n{:#}", "Deno app output:".cyan());
+    println!("{}", String::from_utf8_lossy(&output.stdout));
+    sp.stop();
+    println!();
+    Ok(())
+}
+
+async fn process_batch_validium(
+    batch_number: u32,
+    pubdata: String,
+) -> Result<(), Box<dyn Error>> {
+    println!();
+    let mut sp = Spinner::new(
+        Spinners::Aesthetic,
+        format!("Sending pubdata from batch #{}...", batch_number),
+    );
+    let json_string = format!(
+        r#"
+    {{
+        "{}": "{}"
+    }}"#,
+        batch_number, pubdata
+    );
+    let base64_content = BASE64_STANDARD.encode(json_string.clone());
+    let mut map: HashMap<&str, String> = HashMap::new();
+    map.insert("data", base64_content);
+
+    submit_and_verify_proof_validium(json_string, &mut sp).await?;
+    println!();
     Ok(())
 }
 
