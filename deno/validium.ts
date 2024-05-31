@@ -1,14 +1,10 @@
-import {
-  ApiPromise,
-  Keyring,
-  WsProvider,
-} from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
-import { API_EXTENSIONS, API_RPC, API_TYPES } from "./api_options.ts";
+import { ApiPromise } from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
 import { ISubmittableResult } from "https://deno.land/x/polkadot@0.2.45/types/types/extrinsic.ts";
 import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
 import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
+import { createAccount, initializeAvailApi } from "./helpers.ts";
 
 const env = await load();
 
@@ -18,13 +14,9 @@ const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
 const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
-const availApi = await ApiPromise.create({
-  provider: new WsProvider(AVAIL_RPC),
-  rpc: API_RPC,
-  types: API_TYPES,
-  signedExtensions: API_EXTENSIONS,
-});
-const account = new Keyring({ type: "sr25519" }).addFromUri(SURI);
+
+const availApi = await initializeAvailApi(AVAIL_RPC);
+const account = createAccount(SURI);
 
 /**
  *  ProofData represents a response from the api that holds proof for
