@@ -1,16 +1,21 @@
-import { ethers } from "npm:ethers@5.4";
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import ABI from "./abi/availbridge.json" with { type: "json" };
+import { ProofData, submitDataAndVerify, verifyProof } from "./validium.ts";
+
+const env = await load();
+
+Deno.test("Load environment variables", () => {
+  assert(env["AVAIL_RPC"], "AVAIL_RPC should be defined");
+  assert(env["SURI"], "SURI should be defined");
+  assert(env["DA_BRIDGE_ADDRESS"], "DA_BRIDGE_ADDRESS should be defined");
+  assert(env["BRIDGE_API_URL"], "BRIDGE_API_URL should be defined");
+  assert(env["ETH_PROVIDER_URL"], "ETH_PROVIDER_URL should be defined");
+});
 
 Deno.test("verifyBlobLeaf function should return expected result", async () => {
-  const env = await load();
-
-  const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"];
-  const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"];
-  const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
-  const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
-
   const proof = {
     blobRoot:
       "0xe882a0dd840cc7b99d5f9ff05216be547c7b7d84a61d474353c4d9cb90cb2cdd",
@@ -42,19 +47,21 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
       "0xfbab0eb809f03a99ee5dcca7f4131b6b8a8b56eccbee8f439cd33145d2d14e1d",
   };
 
-  const isVerified = await contractInstance.verifyBlobLeaf([
-    proof.dataRootProof,
-    proof.leafProof,
-    proof.rangeHash,
-    proof.dataRootIndex,
-    proof.blobRoot,
-    proof.bridgeRoot,
-    proof.leaf,
-    proof.leafIndex,
-  ]);
-
-  console.log(`Blob validation is: ${isVerified}`);
-
+  const proofData: ProofData = {
+    dataRootProof: proof.dataRootProof,
+    leafProof: proof.leafProof,
+    rangeHash: proof.rangeHash,
+    dataRootIndex: proof.dataRootIndex,
+    blobRoot: proof.blobRoot,
+    bridgeRoot: proof.bridgeRoot,
+    leaf: proof.leaf,
+    leafIndex: proof.leafIndex,
+  };
+  const isVerified = await verifyProof(proofData);
   const expectedValue = true;
   assertEquals(isVerified, expectedValue);
+});
+
+Deno.test("submitDataAndVerify", async () => {
+  await submitDataAndVerify();
 });

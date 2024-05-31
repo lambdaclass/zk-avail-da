@@ -1,14 +1,10 @@
-import {
-  ApiPromise,
-  Keyring,
-  WsProvider,
-} from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
-import { API_EXTENSIONS, API_RPC, API_TYPES } from "./api_options.ts";
+import { ApiPromise } from "https://deno.land/x/polkadot@0.2.45/api/mod.ts";
 import { ISubmittableResult } from "https://deno.land/x/polkadot@0.2.45/types/types/extrinsic.ts";
 import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
 import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
+import { createAccount, initializeAvailApi } from "./helpers.ts";
 
 const env = await load();
 
@@ -18,24 +14,16 @@ const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
 const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
-const availApi = await ApiPromise.create({
-  provider: new WsProvider(AVAIL_RPC),
-  rpc: API_RPC,
-  types: API_TYPES,
-  signedExtensions: API_EXTENSIONS,
-});
-const account = new Keyring({ type: "sr25519" }).addFromUri(SURI);
 
 /**
  *  ProofData represents a response from the api that holds proof for
  *  the blob verification.
  */
-// deno-lint-ignore no-unused-vars
-class ProofData {
+export class ProofData {
   // proof of inclusion for the data root
   dataRootProof: Array<string> | undefined;
   // proof of inclusion of leaf within blob/bridge root
-  leafProof: string | undefined;
+  leafProof: Array<string> | undefined;
   // abi.encodePacked(startBlock, endBlock) of header range commitment on VectorX
   rangeHash: string | undefined;
   // index of the data root in the commitment tree
@@ -62,7 +50,7 @@ interface SubmitDataResult extends ISubmittableResult {
  * @param account that is sending transaction
  * @returns {Promise<SubmitDataResult>}
  */
-function submitData(
+export function submitData(
   availApi: ApiPromise,
   data: string,
   account: KeyringPair,
@@ -88,17 +76,9 @@ function submitData(
   });
 }
 
-const result: SubmitDataResult = await submitData(availApi, DATA, account);
-if (result.isFinalized) {
-  console.log(
-    `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
-  );
-  console.log(`result submitData = ${JSON.stringify(result)}`);
-}
-
-// wait until the chain head on the Ethereum network is updated with the block range
-// in which the Avail DA transaction is included.
-while (true) {
+export async function getLastCommittedBlock(
+  result: SubmitDataResult,
+): Promise<number> {
   const getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
   if (getHeadRsp.status != 200) {
     console.log("Something went wrong fetching the head.");
@@ -107,7 +87,7 @@ while (true) {
     console.log("Headers:", Array.from(getHeadRsp.headers.entries()));
     const responseBody = await getHeadRsp.text();
     console.log("Response Body:", responseBody);
-    break;
+    Deno.exit(0);
   }
   const headRsp = await getHeadRsp.json();
   const blockNumber: number = Number(result.blockNumber);
@@ -117,43 +97,77 @@ while (true) {
       blockNumber - lastCommittedBlock
     } blocks left`,
   );
-  if (lastCommittedBlock >= blockNumber) {
-    console.log("Fetching the blob proof.");
-    const proofResponse = await fetch(
-      BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" +
-        result.txIndex,
-    );
-    console.log(proofResponse.url);
-    if (proofResponse.status != 200) {
-      console.log("Something went wrong fetching the proof.");
-      console.log(proofResponse);
-      break;
-    }
-    const proof: ProofData = await proofResponse.json();
-    console.log("Proof fetched:");
-    console.log(proof);
-    // call the deployed contract verification function with the inclusion proof.
-    const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
-    const contractInstance = new ethers.Contract(BRIDGE_ADDRESS, ABI, provider);
-    const isVerified = await contractInstance.verifyBlobLeaf([
-      proof.dataRootProof,
-      proof.leafProof,
-      proof.rangeHash,
-      proof.dataRootIndex,
-      proof.blobRoot,
-      proof.bridgeRoot,
-      proof.leaf,
-      proof.leafIndex,
-    ]);
-    console.log(`Blob validation is: ${isVerified}`);
-    break;
-  }
-
-  console.log(
-    "Waiting to bridge inclusion commitment. This can take a while...",
-  );
-  // wait for 1 minute to check again
-  await new Promise((f) => setTimeout(f, 60 * 1000));
+  return lastCommittedBlock;
 }
 
-Deno.exit(0);
+export async function getProof(result: SubmitDataResult): Promise<ProofData> {
+  console.log("Fetching the blob proof.");
+  const proofResponse = await fetch(
+    BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" +
+      result.txIndex,
+  );
+  console.log(proofResponse.url);
+  if (proofResponse.status != 200) {
+    console.log("Something went wrong fetching the proof.");
+    console.log(proofResponse);
+    Deno.exit(0);
+  }
+  const proof: ProofData = await proofResponse.json();
+  console.log("Proof fetched:");
+  console.log(proof);
+  return proof;
+}
+
+export async function verifyProof(proof: ProofData): Promise<boolean> {
+  // call the deployed contract verification function with the inclusion proof.
+  const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
+  const contractInstance = new ethers.Contract(
+    BRIDGE_ADDRESS,
+    ABI,
+    provider,
+  );
+  const isVerified = await contractInstance.verifyBlobLeaf([
+    proof.dataRootProof,
+    proof.leafProof,
+    proof.rangeHash,
+    proof.dataRootIndex,
+    proof.blobRoot,
+    proof.bridgeRoot,
+    proof.leaf,
+    proof.leafIndex,
+  ]);
+  console.log(`Blob validation is: ${isVerified}`);
+  return isVerified;
+}
+
+export async function proofAndVerify(result: SubmitDataResult) {
+  // wait until the chain head on the Ethereum network is updated with the block range
+  // in which the Avail DA transaction is included.
+  while (true) {
+    const blockNumber: number = Number(result.blockNumber);
+    const lastCommittedBlock: number = await getLastCommittedBlock(result);
+    if (lastCommittedBlock >= blockNumber) {
+      const proof = await getProof(result);
+      await verifyProof(proof);
+    }
+    console.log(
+      "Waiting to bridge inclusion commitment. This can take a while...",
+    );
+    // wait for 1 minute to check again
+    await new Promise((f) => setTimeout(f, 60 * 1000));
+  }
+}
+
+export async function submitDataAndVerify() {
+  const availApi = await initializeAvailApi(AVAIL_RPC);
+  const account = createAccount(SURI);
+  const result: SubmitDataResult = await submitData(availApi, DATA, account);
+  if (result.isFinalized) {
+    console.log(
+      `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
+    );
+    console.log(`result submitData = ${JSON.stringify(result)}`);
+  }
+  await proofAndVerify(result);
+  Deno.exit(0);
+}
