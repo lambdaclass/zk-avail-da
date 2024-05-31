@@ -77,64 +77,79 @@ function submitData(
   });
 }
 
+export async function getLastCommittedBlock(
+  result: SubmitDataResult,
+): Promise<number> {
+  const getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
+  if (getHeadRsp.status != 200) {
+    console.log("Something went wrong fetching the head.");
+    console.log("Status:", getHeadRsp.status);
+    console.log("Status Text:", getHeadRsp.statusText);
+    console.log("Headers:", Array.from(getHeadRsp.headers.entries()));
+    const responseBody = await getHeadRsp.text();
+    console.log("Response Body:", responseBody);
+    Deno.exit(0);
+  }
+  const headRsp = await getHeadRsp.json();
+  const blockNumber: number = Number(result.blockNumber);
+  const lastCommittedBlock: number = headRsp.data.end;
+  console.log(
+    `lastCommittedBlock = ${lastCommittedBlock}, blockNumber = ${blockNumber} => ${
+      blockNumber - lastCommittedBlock
+    } blocks left`,
+  );
+  return lastCommittedBlock;
+}
+
+export async function getProof(result: SubmitDataResult): Promise<ProofData> {
+  console.log("Fetching the blob proof.");
+  const proofResponse = await fetch(
+    BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" +
+      result.txIndex,
+  );
+  console.log(proofResponse.url);
+  if (proofResponse.status != 200) {
+    console.log("Something went wrong fetching the proof.");
+    console.log(proofResponse);
+    Deno.exit(0);
+  }
+  const proof: ProofData = await proofResponse.json();
+  console.log("Proof fetched:");
+  console.log(proof);
+  return proof;
+}
+
+export async function verifyProof(proof: ProofData) {
+  // call the deployed contract verification function with the inclusion proof.
+  const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
+  const contractInstance = new ethers.Contract(
+    BRIDGE_ADDRESS,
+    ABI,
+    provider,
+  );
+  const isVerified = await contractInstance.verifyBlobLeaf([
+    proof.dataRootProof,
+    proof.leafProof,
+    proof.rangeHash,
+    proof.dataRootIndex,
+    proof.blobRoot,
+    proof.bridgeRoot,
+    proof.leaf,
+    proof.leafIndex,
+  ]);
+  console.log(`Blob validation is: ${isVerified}`);
+}
+
 export async function proofAndVerify(result: SubmitDataResult) {
   // wait until the chain head on the Ethereum network is updated with the block range
   // in which the Avail DA transaction is included.
   while (true) {
-    const getHeadRsp = await fetch(BRIDGE_API_URL + "/avl/head");
-    if (getHeadRsp.status != 200) {
-      console.log("Something went wrong fetching the head.");
-      console.log("Status:", getHeadRsp.status);
-      console.log("Status Text:", getHeadRsp.statusText);
-      console.log("Headers:", Array.from(getHeadRsp.headers.entries()));
-      const responseBody = await getHeadRsp.text();
-      console.log("Response Body:", responseBody);
-      break;
-    }
-    const headRsp = await getHeadRsp.json();
     const blockNumber: number = Number(result.blockNumber);
-    const lastCommittedBlock: number = headRsp.data.end;
-    console.log(
-      `lastCommittedBlock = ${lastCommittedBlock}, blockNumber = ${blockNumber} => ${
-        blockNumber - lastCommittedBlock
-      } blocks left`,
-    );
+    const lastCommittedBlock: number = await getLastCommittedBlock(result);
     if (lastCommittedBlock >= blockNumber) {
-      console.log("Fetching the blob proof.");
-      const proofResponse = await fetch(
-        BRIDGE_API_URL + "/eth/proof/" + result.status.asFinalized + "?index=" +
-          result.txIndex,
-      );
-      console.log(proofResponse.url);
-      if (proofResponse.status != 200) {
-        console.log("Something went wrong fetching the proof.");
-        console.log(proofResponse);
-        break;
-      }
-      const proof: ProofData = await proofResponse.json();
-      console.log("Proof fetched:");
-      console.log(proof);
-      // call the deployed contract verification function with the inclusion proof.
-      const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
-      const contractInstance = new ethers.Contract(
-        BRIDGE_ADDRESS,
-        ABI,
-        provider,
-      );
-      const isVerified = await contractInstance.verifyBlobLeaf([
-        proof.dataRootProof,
-        proof.leafProof,
-        proof.rangeHash,
-        proof.dataRootIndex,
-        proof.blobRoot,
-        proof.bridgeRoot,
-        proof.leaf,
-        proof.leafIndex,
-      ]);
-      console.log(`Blob validation is: ${isVerified}`);
-      break;
+      const proof = await getProof(result);
+      await verifyProof(proof);
     }
-
     console.log(
       "Waiting to bridge inclusion commitment. This can take a while...",
     );
