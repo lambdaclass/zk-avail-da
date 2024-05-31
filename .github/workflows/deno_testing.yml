@@ -24,7 +24,7 @@ jobs:
           echo "AVAIL_RPC=${{ secrets.AVAIL_RPC }}" >> .env
           echo "DA_BRIDGE_ADDRESS=${{ secrets.DA_BRIDGE_ADDRESS }}" >> .env
           echo "BRIDGE_API_URL=${{ secrets.BRIDGE_API_URL }}" >> .env
-          echo "ETH_PROVIDER_URL=${{ secrets.ETH_PROVIDER_URL }}" > .env
+          echo "ETH_PROVIDER_URL=${{ secrets.ETH_PROVIDER_URL }}" >> .env
           cat .env
         shell: bash
       - name: Run tests
