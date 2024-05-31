@@ -19,12 +19,11 @@ const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
  *  ProofData represents a response from the api that holds proof for
  *  the blob verification.
  */
-// deno-lint-ignore no-unused-vars
-class ProofData {
+export class ProofData {
   // proof of inclusion for the data root
   dataRootProof: Array<string> | undefined;
   // proof of inclusion of leaf within blob/bridge root
-  leafProof: string | undefined;
+  leafProof: Array<string> | undefined;
   // abi.encodePacked(startBlock, endBlock) of header range commitment on VectorX
   rangeHash: string | undefined;
   // index of the data root in the commitment tree
@@ -119,7 +118,7 @@ export async function getProof(result: SubmitDataResult): Promise<ProofData> {
   return proof;
 }
 
-export async function verifyProof(proof: ProofData) {
+export async function verifyProof(proof: ProofData): Promise<boolean> {
   // call the deployed contract verification function with the inclusion proof.
   const provider = new ethers.providers.JsonRpcProvider(ETH_PROVIDER_URL);
   const contractInstance = new ethers.Contract(
@@ -138,6 +137,7 @@ export async function verifyProof(proof: ProofData) {
     proof.leafIndex,
   ]);
   console.log(`Blob validation is: ${isVerified}`);
+  return isVerified;
 }
 
 export async function proofAndVerify(result: SubmitDataResult) {
@@ -171,5 +171,3 @@ export async function submitDataAndVerify() {
   await proofAndVerify(result);
   Deno.exit(0);
 }
-
-submitDataAndVerify();
