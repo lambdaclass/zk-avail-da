@@ -142,20 +142,17 @@ export async function verifyProof(proof: ProofData): Promise<boolean> {
 export async function proofAndVerify(result: SubmitDataResult) {
   // wait until the chain head on the Ethereum network is updated with the block range
   // in which the Avail DA transaction is included.
-  while (true) {
-    const blockNumber: number = Number(result.blockNumber);
-    const lastCommittedBlock: number = await getLastCommittedBlock(result);
-    if (lastCommittedBlock >= blockNumber) {
-      const proof = await getProof(result);
-      await verifyProof(proof);
-      Deno.exit(0);
-    }
+  const blockNumber: number = Number(result.blockNumber);
+  let lastCommittedBlock: number = await getLastCommittedBlock(result);
+  while (lastCommittedBlock < blockNumber) {
     console.log(
       "Waiting to bridge inclusion commitment. This can take a while...",
     );
-    // wait for 1 minute to check again
-    await new Promise((f) => setTimeout(f, 60 * 1000));
+    await new Promise((f) => setTimeout(f, 60 * 1000)); // wait for 1 minute to check again
+    lastCommittedBlock = await getLastCommittedBlock(result);
   }
+  const proof = await getProof(result);
+  await verifyProof(proof);
 }
 
 export async function submitDataAndVerify(data: string) {
