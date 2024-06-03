@@ -148,6 +148,7 @@ export async function proofAndVerify(result: SubmitDataResult) {
     if (lastCommittedBlock >= blockNumber) {
       const proof = await getProof(result);
       await verifyProof(proof);
+      Deno.exit(0);
     }
     console.log(
       "Waiting to bridge inclusion commitment. This can take a while...",
