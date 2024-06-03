@@ -166,5 +166,4 @@ export async function submitDataAndVerify(data: string) {
     console.log(`result submitData = ${JSON.stringify(result)}`);
   }
   await proofAndVerify(result);
-  Deno.exit(0);
 }
