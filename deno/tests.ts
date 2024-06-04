@@ -4,6 +4,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import { ProofData, submitDataAndVerify, verifyProof } from "./validium.ts";
+import { pubdataTest } from "./pubdata_test.ts";
 
 const env = await load();
 
@@ -62,6 +63,13 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
   assertEquals(isVerified, expectedValue);
 });
 
-Deno.test("submitDataAndVerify", async () => {
-  await submitDataAndVerify();
+Deno.test({
+  name: "submitDataAndVerify",
+  async fn() {
+    for (const batch of pubdataTest) {
+      await submitDataAndVerify(batch);
+    }
+  },
+  sanitizeOps: false,
+  sanitizeResources: false,
 });

@@ -11,7 +11,6 @@ const env = await load();
 const AVAIL_RPC = env["AVAIL_RPC"];
 const SURI = env["SURI"];
 const BRIDGE_ADDRESS = env["DA_BRIDGE_ADDRESS"]; // deployed bridge address
-const DATA = "a"; // data to send
 const BRIDGE_API_URL = env["BRIDGE_API_URL"]; // bridge api url
 const ETH_PROVIDER_URL = env["ETH_PROVIDER_URL"]; // eth provider url
 
@@ -143,25 +142,23 @@ export async function verifyProof(proof: ProofData): Promise<boolean> {
 export async function proofAndVerify(result: SubmitDataResult) {
   // wait until the chain head on the Ethereum network is updated with the block range
   // in which the Avail DA transaction is included.
-  while (true) {
-    const blockNumber: number = Number(result.blockNumber);
-    const lastCommittedBlock: number = await getLastCommittedBlock(result);
-    if (lastCommittedBlock >= blockNumber) {
-      const proof = await getProof(result);
-      await verifyProof(proof);
-    }
+  const blockNumber: number = Number(result.blockNumber);
+  let lastCommittedBlock: number = await getLastCommittedBlock(result);
+  while (lastCommittedBlock < blockNumber) {
     console.log(
       "Waiting to bridge inclusion commitment. This can take a while...",
     );
-    // wait for 1 minute to check again
-    await new Promise((f) => setTimeout(f, 60 * 1000));
+    await new Promise((f) => setTimeout(f, 60 * 1000)); // wait for 1 minute to check again
+    lastCommittedBlock = await getLastCommittedBlock(result);
   }
+  const proof = await getProof(result);
+  await verifyProof(proof);
 }
 
-export async function submitDataAndVerify() {
+export async function submitDataAndVerify(data: string) {
   const availApi = await initializeAvailApi(AVAIL_RPC);
   const account = createAccount(SURI);
-  const result: SubmitDataResult = await submitData(availApi, DATA, account);
+  const result: SubmitDataResult = await submitData(availApi, data, account);
   if (result.isFinalized) {
     console.log(
       `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
@@ -169,5 +166,5 @@ export async function submitDataAndVerify() {
     console.log(`result submitData = ${JSON.stringify(result)}`);
   }
   await proofAndVerify(result);
-  Deno.exit(0);
+  await availApi.disconnect();
 }
