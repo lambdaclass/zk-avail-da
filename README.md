@@ -1,145 +1,76 @@
 # ZKSync Era Integration with Avail DA
 
+## Introduction
+
 This project aims to export data from [ZKSync Era](https://github.com/matter-labs/zksync-era) to [AvailDA](https://www.availproject.org/da).
 
-## How it Works
+## 🚀 Project Structure
 
-To achieve interoperability, the project requires setting up three nodes and a DA server:
+This project contains different subprojects:
 
-- **Avail DA node**: Official client for the Avail blockchain.
-- **Avail light node**: DA light client which listens on Avail network for finalized blocks.
-- **Avail light Bootstrap node**: Bootstrap node for Avail light client.
-- **Avail DA server**
+- **[deno](./deno/)**: A Deno script to submit pubdata from [ZKSync Era](https://github.com/matter-labs/zksync-era) to Turing Avail DA and verify it (using Sepolia).
+- **[avail-da](./avail-da/)**: Docker containers to run an Avail DA node locally.
+- **[da-sender](./da-sender/)**: A Rust script to submit pubdata from [ZKSync Era](https://github.com/matter-labs/zksync-era) to the local Avail DA node.
+- **[da-getter](./da-getter/)**: A Rust script to retrieve data from the local Avail DA node.
 
-## Requirements
+## 🛠 Requirements
 
-Docker and Docker Compose are required to run the services. Ensure you have Docker installed on your system before proceeding.
+To run this project, you need to have installed:
 
-## Running Avail DA
+- [Docker and Docker Compose](https://www.docker.com/products/docker-desktop).
+- [Deno](https://deno.com).
+- [Rust](https://www.rust-lang.org/tools/install).
 
-To set up and run Avail DA, execute the following command:
+## 👨‍💻 Usage
+
+The usage of this project is divided into two main scenarios:
+
+- Using the Avail DA Turing Testnet
+- Running Avail DA locally.
+
+Each scenario provides different ways to interact with the data availability layer, either through a public testnet or a local setup.
+
+### Testnet
+
+#### Sending and Verifying Pubdata Using Avail DA Turing Testnet
+
+To run the Deno script that retrieves pubdata from `ZKSync Era`, sends it and verifies it using Turing Avail DA use the following command:
+```
+make validium
+```
+
+### Local
+#### Running Avail DA Locally
+
+To set up and run Avail DA locally, execute the following command:
 ```sh
 make avail-da
 ```
-This command will handle the necessary setup and execution steps for Avail DA.
+This command builds and starts the Docker containers necessary for running Avail DA on your local machine.
 
-## Running Avail DA Testnet
+#### Sending Pubdata to the Local Avail DA Node
 
-To configure and run Avail DA with Goldberg's Testnet, run the following command:
-```sh
-make avail-da-testnet
-```
-This command will create a single Light Node docker with the necessary configuration to use this testnet. Unlike the local Avail DA, it will listen on port 8002.
-
-## Using the API Light Node
-
-After setting up Avail DA, you can interact with the API Light Node by sending requests to port 8001. Here are a couple of example requests:
-
-### Get Latest Block
-```sh
-curl http://127.0.0.1:8001/v1/latest_block
-```
-Response:
-```json
-{"latest_block":168}
-```
-
-### Get Block Status
-```sh
-curl http://127.0.0.1:8001/v2/blocks/158
-```
-Response:
-```json
-{"status":"finished","confidence":93.75}
-```
-
-### Explorer
-
-You can use an explorer by accessing [this URL](https://explorer.avail.so/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer).
-
-# Sending ZKSync Era Pubdata to AvailDA
-
-To send pubdata from ZKSync Era to AvailDA, follow these steps:
-
-## Prerequisites
-
-- Ensure that AvailDA is running on your system.
-
-```sh
-make avail-da
-```
-
-- Clone [ZKSync Era](https://github.com/lambdaclass/zksync-era) repository and switch to the `validium-demo-new-main` branch.
-
-## Sending Pubdata
-
-### Step 1: Generate Pubdata
-
-Navigate to the `zksync-era` directory and run the following command:
-
-```sh
-zk && zk clean --all && zk env dev_validium && zk init --validium-mode && zk server
-```
-
-### Step 2: Run Demo Scenario
-
-In another terminal, execute the following command to run the basic scenario of the demo:
-
-```sh
-cargo run --package validium_mode_example --bin validium_mode_example
-```
-
-Please be patient as it may take some time to retrieve the pubdata.
-
-### Step 3: Retrieve Pubdata
-
-Once the pubdata retrieval process is complete, run the DA manager to retrieve the pubdata:
-
-```sh
-python da_manager_example/main.py
-```
-
-You should see a message confirming the retrieval of the pubdata, along with the batch number.
-
-```
-Starting from batch #1
-Got batch #1 pubdata
-```
-
-You can see the retrieved data in `da_manager_example/data/pubdata_storage.json`.
-
-### Step 4: Send Pubdata to AvailDA
-
-Now, going back to the directory of this project, you can send the retrieved pubdata to your local AvailDA using the Light Node by executing the following command:
+With the `da-sender` script, after following the [steps](./da-sender/README.md), you can send pubdata from **ZKSync Era** to the local Avail DA by running this command:
 
 ```sh
 make send-data
 ```
+This command uses the da-sender script to submit the pubdata to your locally running Avail DA node.
 
-This command will trigger the sending of the pubdata to AvailDA. If the send is successful, you should receive information such as the block hash, block number, hash and index in AvailDA.
+## 🧞 Commands
 
-## Get Block Data from AvailDA
+All commands are run from the root of the project, from a terminal:
 
-If you want to get block data from AvailDA, you can use the following command:
-
-```sh
-make get-data
-```
-
-You will be prompted to enter the block number and you will get your original decoded data in `da-getter/data/retrieved_data.json`.
-
-
-## Send Custom Pubdata to AvailDA
-
-After updating the `da-sender/data/pubdata_storage.json`, run the following command:
-
-```sh
-make send-custom-data
-```
-
-## Format
-
-Run the following command:
-```sh
-make format
-```
+| Command              | Action                                                                      |
+| :------------------- | :-------------------------------------------------------------------------- |
+| `make avail-da`      | Builds and starts the Avail DA services locally using Docker                |
+| `make clean`         | Stops and removes Docker containers and networks created by the project     |
+| `make build`         | Builds the Docker images for Avail DA                                       |
+| `make avail-da-full` | Builds and runs the full Avail DA node with multiple exposed ports          |
+| `make avail-da-testnet` | Builds and runs the Avail DA node for the testnet environment               |
+| `make send-data`     | Compiles and runs the `da-sender` Rust script to submit pubdata             |
+| `make send-custom-data` | Compiles and runs the `da-sender` Rust script with custom pubdata submission |
+| `make get-data`      | Compiles and runs the `da-getter` Rust script to retrieve data              |
+| `make format`        | Formats the code in `da-sender`, `da-getter`, and `deno` directories        |
+| `make validium`      | Runs the Deno script that retrieves pubdata from `ZKSync Era`, sends it and verifies it to Avail   |
+| `make validium-test`        | Runs Deno tests |

@@ -25,6 +25,9 @@ BRIDGE_API_URL=https://turing-bridge-api.fra.avail.so
 ETH_PROVIDER_URL=https://ethereum-sepolia.rpc.subquery.network/public
 ```
 
+- Have running [ZKSync Era](https://github.com/lambdaclass/zksync-era) (in
+  `validium-demo-new-main` branch) running in **Validium Mode**.
+
 ## Run
 
 ```sh
@@ -33,7 +36,18 @@ deno task validium
 
 ## What does?
 
-Submit the data to the Turing Testnet DA:
+Reads the pubdata using the method `zks_getBatchPubdata` from `ZKSync Era` and
+for each batch retrieved we will submit and verify the data:
+
+```ts
+getPubdata(L2_URL, RETRIES).then(async (result) => {
+  for (const batch of result) {
+    await submitDataAndVerify(batch);
+  }
+});
+```
+
+First, we submit the data to the Turing Testnet DA:
 
 ```ts
 const result: SubmitDataResult = await submitData(availApi, DATA, account);
