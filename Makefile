@@ -47,3 +47,11 @@ format:
 	cargo fmt
 	cd deno && \
 	deno fmt
+
+validium:
+	cd deno && \
+	deno task validium
+
+validium-test:
+	cd deno && \
+	deno task test

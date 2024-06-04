@@ -56,8 +56,6 @@ This command uses the da-sender script to submit the pubdata to your locally run
 
 ## 🧞 Commands
 
-## 🧞 Commands
-
 All commands are run from the root of the project, from a terminal:
 
 | Command              | Action                                                                      |
@@ -71,3 +69,5 @@ All commands are run from the root of the project, from a terminal:
 | `make send-custom-data` | Compiles and runs the `da-sender` Rust script with custom pubdata submission |
 | `make get-data`      | Compiles and runs the `da-getter` Rust script to retrieve data              |
 | `make format`        | Formats the code in `da-sender`, `da-getter`, and `deno` directories        |
+| `make validium`      | Runs the Deno script that retrieves pubdata from `ZKSync Era`, sends it and verifies it to Avail   |
+| `make validium-test`        | Runs Deno tests |
