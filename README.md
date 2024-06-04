@@ -21,7 +21,7 @@ To run this project, you need to have installed:
 - [Deno](https://deno.com).
 - [Rust](https://www.rust-lang.org/tools/install).
 
-## Usage
+## 👨‍💻 Usage
 
 The usage of this project is divided into two main scenarios:
 
@@ -34,7 +34,10 @@ Each scenario provides different ways to interact with the data availability lay
 
 #### Sending and Verifying Pubdata Using Avail DA Turing Testnet
 
-*Documentation pending.*
+To run the Deno script that retrieves pubdata from `ZKSync Era`, sends it and verifies it using Turing Avail DA use the following command:
+```
+make validium
+```
 
 ### Local
 #### Running Avail DA Locally
