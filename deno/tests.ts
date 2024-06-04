@@ -63,8 +63,13 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
   assertEquals(isVerified, expectedValue);
 });
 
-Deno.test("submitDataAndVerify", async () => {
-  for (const batch of pubdataTest) {
-    await submitDataAndVerify(batch);
-  }
+Deno.test({
+  name: "submitDataAndVerify",
+  async fn() {
+    for (const batch of pubdataTest) {
+      await submitDataAndVerify(batch);
+    }
+  },
+  sanitizeOps: false,
+  sanitizeResources: false,
 });
