@@ -1,6 +1,6 @@
 # ZKSync Era Integration with Avail DA
 
-## Integration of ZKSync Era with Avail DA
+## Introduction
 
 This project aims to export data from [ZKSync Era](https://github.com/matter-labs/zksync-era) to [AvailDA](https://www.availproject.org/da).
 
@@ -17,17 +17,24 @@ This project contains different subprojects:
 
 To run this project, you need to have installed:
 
-- [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/).
-- [Deno](https://deno.com/).
+- [Docker and Docker Compose](https://www.docker.com/products/docker-desktop).
+- [Deno](https://deno.com).
 - [Rust](https://www.rust-lang.org/tools/install).
 
 ## Usage
+
+The usage of this project is divided into two main scenarios:
+
+- Using the Avail DA Turing Testnet
+- Running Avail DA locally.
+
+Each scenario provides different ways to interact with the data availability layer, either through a public testnet or a local setup.
 
 ### Testnet
 
 #### Sending and Verifying Pubdata Using Avail DA Turing Testnet
 
-[TODO]
+*Documentation pending.*
 
 ### Local
 #### Running Avail DA Locally
@@ -36,6 +43,7 @@ To set up and run Avail DA locally, execute the following command:
 ```sh
 make avail-da
 ```
+This command builds and starts the Docker containers necessary for running Avail DA on your local machine.
 
 #### Sending Pubdata to the Local Avail DA Node
 
@@ -44,7 +52,8 @@ With the `da-sender` script, after following the [steps](./da-sender/README.md),
 ```sh
 make send-data
 ```
+This command uses the da-sender script to submit the pubdata to your locally running Avail DA node.
 
 ## 🧞 Commands
 
-[TODO]
+*Documentation pending.*
