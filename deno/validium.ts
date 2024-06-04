@@ -158,12 +158,13 @@ export async function proofAndVerify(result: SubmitDataResult) {
 export async function submitDataAndVerify(data: string) {
   const availApi = await initializeAvailApi(AVAIL_RPC);
   const account = createAccount(SURI);
-  const result: SubmitDataResult = await submitData(availApi, data, account);
-  if (result.isFinalized) {
-    console.log(
-      `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
-    );
-    console.log(`result submitData = ${JSON.stringify(result)}`);
-  }
-  await proofAndVerify(result);
+  // const result: SubmitDataResult = await submitData(availApi, data, account);
+  // if (result.isFinalized) {
+  //   console.log(
+  //     `DA transaction in finalized block: ${result.blockNumber}, transaction index: ${result.txIndex}`,
+  //   );
+  //   console.log(`result submitData = ${JSON.stringify(result)}`);
+  // }
+  // await proofAndVerify(result);
+  await availApi.disconnect();
 }
