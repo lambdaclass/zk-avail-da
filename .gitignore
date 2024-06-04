@@ -2,7 +2,6 @@
 da-getter/data/retrieved_data.json
 da-sender/data/pubdata_storage.json
 **/node_modules
-validium/.env
 account.json
 deno/.env
 .vscode/
