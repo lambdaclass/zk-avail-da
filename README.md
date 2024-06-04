@@ -2,60 +2,23 @@
 
 This project aims to export data from [ZKSync Era](https://github.com/matter-labs/zksync-era) to [AvailDA](https://www.availproject.org/da).
 
-## How it Works
+## Project Structure
 
-To achieve interoperability, the project requires setting up three nodes and a DA server:
-
-- **Avail DA node**: Official client for the Avail blockchain.
-- **Avail light node**: DA light client which listens on Avail network for finalized blocks.
-- **Avail light Bootstrap node**: Bootstrap node for Avail light client.
-- **Avail DA server**
+[TODO]
 
 ## Requirements
 
-Docker and Docker Compose are required to run the services. Ensure you have Docker installed on your system before proceeding.
+- [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/) are required to `avail-da` containers.
+- [Deno](https://deno.com/) for running `validium` script.
+- [Rust](https://www.rust-lang.org/tools/install) to run the `da-getter` and `da-sender` scripts.
 
-## Running Avail DA
+## Running Avail DA locally
 
 To set up and run Avail DA, execute the following command:
 ```sh
 make avail-da
 ```
 This command will handle the necessary setup and execution steps for Avail DA.
-
-## Running Avail DA Testnet
-
-To configure and run Avail DA with Goldberg's Testnet, run the following command:
-```sh
-make avail-da-testnet
-```
-This command will create a single Light Node docker with the necessary configuration to use this testnet. Unlike the local Avail DA, it will listen on port 8002.
-
-## Using the API Light Node
-
-After setting up Avail DA, you can interact with the API Light Node by sending requests to port 8001. Here are a couple of example requests:
-
-### Get Latest Block
-```sh
-curl http://127.0.0.1:8001/v1/latest_block
-```
-Response:
-```json
-{"latest_block":168}
-```
-
-### Get Block Status
-```sh
-curl http://127.0.0.1:8001/v2/blocks/158
-```
-Response:
-```json
-{"status":"finished","confidence":93.75}
-```
-
-### Explorer
-
-You can use an explorer by accessing [this URL](https://explorer.avail.so/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer).
 
 # Sending ZKSync Era Pubdata to AvailDA
 
