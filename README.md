@@ -56,4 +56,18 @@ This command uses the da-sender script to submit the pubdata to your locally run
 
 ## 🧞 Commands
 
-*Documentation pending.*
+## 🧞 Commands
+
+All commands are run from the root of the project, from a terminal:
+
+| Command              | Action                                                                      |
+| :------------------- | :-------------------------------------------------------------------------- |
+| `make avail-da`      | Builds and starts the Avail DA services locally using Docker                |
+| `make clean`         | Stops and removes Docker containers and networks created by the project     |
+| `make build`         | Builds the Docker images for Avail DA                                       |
+| `make avail-da-full` | Builds and runs the full Avail DA node with multiple exposed ports          |
+| `make avail-da-testnet` | Builds and runs the Avail DA node for the testnet environment               |
+| `make send-data`     | Compiles and runs the `da-sender` Rust script to submit pubdata             |
+| `make send-custom-data` | Compiles and runs the `da-sender` Rust script with custom pubdata submission |
+| `make get-data`      | Compiles and runs the `da-getter` Rust script to retrieve data              |
+| `make format`        | Formats the code in `da-sender`, `da-getter`, and `deno` directories        |
