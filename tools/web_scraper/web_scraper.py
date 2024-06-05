@@ -24,15 +24,22 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=chrome_options)
 driver.get(URL)
 
-while (True):
-    try:
+try:
+    while (True):
         wait = WebDriverWait(driver, 10)
         address_input = wait.until(EC.visibility_of_element_located((By.ID, ADDRESS_INPUT_TAG)))
         address_input.send_keys(address)
 
         button = wait.until(EC.element_to_be_clickable((By.XPATH, f"//button[text()='{BUTTON_TEXT}']")))
         button.click()
-        print(f"Successfully Get AVAIL!")
+        time.sleep(2)
+        page_source = driver.page_source
+        if "You have already claimed in the last 24 hours." in page_source:
+            print("Error: You have already claimed in the last 24 hours.")
+        elif "Something went wrong." in page_source:
+            print("Error: Something went wrong. Unknown Error.")
+        else:
+            print("Successfully claimed AVAIL!")
         time.sleep(86400) # Wait a day
-    finally:
-        driver.quit()
+finally:
+    driver.quit()
