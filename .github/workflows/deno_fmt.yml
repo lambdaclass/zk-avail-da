@@ -18,4 +18,4 @@ jobs:
         with:
           deno-version: v1.x
       - name: Lint Deno Module
-        run: cd deno && deno fmt --check
+        run: cd validium && deno fmt --check
