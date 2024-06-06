@@ -42,7 +42,7 @@ The script uses Selenium to interact with the web page, log the events, and send
 2. **Run the Script**:
 
     ```sh
-    python main.py
+    python web_scraper.py
     ```
     The script will attempt to claim AVAIL tokens once a day, log the events, and send email notifications about the success or failure of each attempt.
 
@@ -53,7 +53,7 @@ The script uses Selenium to interact with the web page, log the events, and send
 ├── logs                    # Directory where log files are stored
 ├── venv                    # Virtual environment directory
 ├── .env                    # Environment variables file
-├── main.py                 # Main script
+├── web_scraper.py          # Web Scraper script
 ├── requirements.txt        # Python dependencies
 └── README.md               # Project README file
 ```
