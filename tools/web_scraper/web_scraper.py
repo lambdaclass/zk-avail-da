@@ -1,6 +1,9 @@
 import os
 import time
 import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,10 +12,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from dotenv import load_dotenv
 
-def load_address():
-    """Load environment variable address from the .env file."""
+def load_environment_variables():
+    """Load environment variables from the .env file."""
     load_dotenv()
-    return os.getenv('ADDRESS')
+    return {
+        'address': os.getenv('ADDRESS'),
+        'email': os.getenv('EMAIL'),
+        'smtp_server': os.getenv('SMTP_SERVER'),
+        'smtp_port': os.getenv('SMTP_PORT'),
+        'smtp_user': os.getenv('SMTP_USER'),
+        'smtp_password': os.getenv('SMTP_PASSWORD')
+    }
 
 def setup_webdriver():
     """Configure the Selenium driver to work in headless mode."""
@@ -46,14 +56,34 @@ def claim_avail(driver, address):
 
 def check_for_errors(page_source):
     """Check if there are error messages on the page."""
+    message = "Successfully claimed AVAIL!"
     if "You have already claimed in the last 24 hours." in page_source:
-        print("Error: You have already claimed in the last 24 hours.")
-        logging.info("Error: You have already claimed in the last 24 hours.")
+        message = "Error: You have already claimed in the last 24 hours."
     elif "Something went wrong." in page_source:
-        print("Error: Something went wrong. Unknown Error.")
-        logging.info("Error: Something went wrong. Unknown Error.")
-    else:
-        logging.info("Successfully claimed AVAIL!")
+        message = "Error: Something went wrong. Unknown Error."
+    logging.info(message)
+    return message
+
+def send_email(subject, body, config):
+    """Send an email with the given subject and body."""
+    msg = MIMEMultipart()
+    msg['From'] = config['smtp_user']
+    msg['To'] = config['email']
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP(config['smtp_server'], config['smtp_port'])
+        server.ehlo()
+        server.starttls()
+        server.login(config['smtp_user'], config['smtp_password'])
+        text = msg.as_string()
+        server.sendmail(config['smtp_user'], config['email'], text)
+        server.quit()
+        logging.info("Email sent successfully.")
+    except Exception as e:
+        logging.error(f"Failed to send email: {e}")
 
 def setup_logging():
     """Set up logging to log events to a file."""
@@ -71,14 +101,16 @@ def setup_logging():
 
 def main():
     setup_logging()
-    address = load_address()
+    config = load_environment_variables()
+    address = config['address']
     driver = setup_webdriver()
 
     try:
         while True:
             logging.info("Starting claim process.")
             page_source = claim_avail(driver, address)
-            check_for_errors(page_source)
+            message = check_for_errors(page_source)
+            send_email("AVAIL Faucet Claim Status", message, config)
             logging.info("Claim process completed. Waiting for 24 hours.")
             # Wait a day before trying again
             time.sleep(86400)
