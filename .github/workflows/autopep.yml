@@ -1,0 +1,35 @@
+name: Autopep8 Check
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  autopep8-check:
+    name: Check Code Style with Autopep8
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10.13
+
+    - name: Install dependencies
+      run: |
+        cd tools/web_scraper
+        python -m pip install --upgrade pip
+        pip install autopep8
+
+    - name: Check code style
+      run: |
+        cd tools/web_scraper
+        if autopep8 --recursive --exclude venv --diff . | grep -E '^\+'; then
+          echo "Code style issues found. Please run autopep8 to fix them."
+          exit 1
+        fi

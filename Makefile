@@ -1,4 +1,4 @@
-.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data get-data
+.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data get-data web-scraper web-scraper-install web-scraper-run web-scraper-venv web-scraper-clean
 
 avail-da: clean build
 	@echo "Starting Avail services..."
@@ -47,6 +47,7 @@ format:
 	cargo fmt
 	cd deno && \
 	deno fmt
+	cd tools/web_scraper && source venv/bin/activate && autopep8 --recursive --exclude venv --in-place .
 
 validium:
 	cd deno && \
@@ -55,3 +56,30 @@ validium:
 validium-test:
 	cd deno && \
 	deno task test
+
+VENV_DIR = tools/web_scraper/venv
+ACTIVATE = source $(VENV_DIR)/bin/activate
+PYTHON = $(VENV_DIR)/bin/python
+PIP = $(VENV_DIR)/bin/pip
+REQUIREMENTS = tools/web_scraper/requirements.txt
+SCRIPT = tools/web_scraper/web_scraper.py
+
+web-scraper: web-scraper-install web-scraper-run
+
+web-scraper-install: web-scraper-venv
+	$(ACTIVATE) && $(PIP) install -r $(REQUIREMENTS)
+
+web-scraper-run: web-scraper-install
+	$(ACTIVATE) && $(PYTHON) $(SCRIPT)
+
+web-scraper-venv:
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		python3 -m venv $(VENV_DIR); \
+	fi
+
+web-scraper-clean:
+	rm -rf $(VENV_DIR)
+	find . -type d -name "__pycache__" -exec rm -r {} +
+
+web-scraper-clean-logs:
+	rm -rf tools/web_scraper/logs

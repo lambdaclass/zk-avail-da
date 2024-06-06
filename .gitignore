@@ -3,5 +3,7 @@ da-getter/data/retrieved_data.json
 da-sender/data/pubdata_storage.json
 **/node_modules
 account.json
-deno/.env
+.env
 .vscode/
+venv/
+logs/
