@@ -61,7 +61,7 @@ def setup_logging():
         os.makedirs('logs')
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f'logs/avail_faucet_{timestamp}.log'
+    log_filename = f'logs/{timestamp}.log'
 
     logging.basicConfig(
         filename=log_filename,
