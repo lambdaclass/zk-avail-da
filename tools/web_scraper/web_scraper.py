@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from dotenv import load_dotenv
 
+
 def load_environment_variables():
     """Load environment variables from the .env file."""
     load_dotenv()
@@ -24,6 +25,7 @@ def load_environment_variables():
         'smtp_password': os.getenv('SMTP_PASSWORD')
     }
 
+
 def setup_webdriver():
     """Configure the Selenium driver to work in headless mode."""
     chrome_options = Options()
@@ -32,6 +34,7 @@ def setup_webdriver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     return webdriver.Chrome(options=chrome_options)
+
 
 def claim_avail(driver, address):
     """Perform the request to claim AVAIL."""
@@ -42,10 +45,12 @@ def claim_avail(driver, address):
     driver.get(URL)
 
     wait = WebDriverWait(driver, 10)
-    address_input = wait.until(EC.visibility_of_element_located((By.ID, ADDRESS_INPUT_TAG)))
+    address_input = wait.until(
+        EC.visibility_of_element_located((By.ID, ADDRESS_INPUT_TAG)))
     address_input.send_keys(address)
 
-    button = wait.until(EC.element_to_be_clickable((By.XPATH, f"//button[text()='{BUTTON_TEXT}']")))
+    button = wait.until(EC.element_to_be_clickable(
+        (By.XPATH, f"//button[text()='{BUTTON_TEXT}']")))
     button.click()
 
     # Wait a moment for the toast message to appear
@@ -53,6 +58,7 @@ def claim_avail(driver, address):
 
     page_source = driver.page_source
     return page_source
+
 
 def check_for_errors(page_source):
     """Check if there are error messages on the page."""
@@ -63,6 +69,7 @@ def check_for_errors(page_source):
         message = "Error: Something went wrong. Unknown Error."
     logging.info(message)
     return message
+
 
 def send_email(subject, body, config):
     """Send an email with the given subject and body."""
@@ -85,6 +92,7 @@ def send_email(subject, body, config):
     except Exception as e:
         logging.error(f"Failed to send email: {e}")
 
+
 def setup_logging():
     """Set up logging to log events to a file."""
     if not os.path.exists('logs'):
@@ -98,6 +106,7 @@ def setup_logging():
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
+
 
 def main():
     setup_logging()
@@ -117,6 +126,7 @@ def main():
     finally:
         driver.quit()
         logging.info("Driver quit successfully.")
+
 
 if __name__ == "__main__":
     main()

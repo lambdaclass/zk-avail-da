@@ -47,6 +47,7 @@ format:
 	cargo fmt
 	cd deno && \
 	deno fmt
+	cd tools/web_scraper && source venv/bin/activate && autopep8 --recursive --exclude venv --in-place .
 
 validium:
 	cd deno && \
