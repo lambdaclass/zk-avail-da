@@ -8,7 +8,7 @@ This project aims to export data from [ZKSync Era](https://github.com/matter-lab
 
 This project contains different subprojects:
 
-- **[deno](./deno/)**: A Deno script to submit pubdata from [ZKSync Era](https://github.com/matter-labs/zksync-era) to Turing Avail DA and verify it (using Sepolia).
+- **[validium](./validium/)**: A Deno script to submit pubdata from [ZKSync Era](https://github.com/matter-labs/zksync-era) to Turing Avail DA and verify it (using Sepolia).
 - **[avail-da](./avail-da/)**: Docker containers to run an Avail DA node locally.
 - **[da-sender](./da-sender/)**: A Rust script to submit pubdata from [ZKSync Era](https://github.com/matter-labs/zksync-era) to the local Avail DA node.
 - **[da-getter](./da-getter/)**: A Rust script to retrieve data from the local Avail DA node.
@@ -83,7 +83,7 @@ All commands are run from the root of the project, from a terminal:
 | `make send-data`     | Compiles and runs the `da-sender` Rust script to submit pubdata             |
 | `make send-custom-data` | Compiles and runs the `da-sender` Rust script with custom pubdata submission |
 | `make get-data`      | Compiles and runs the `da-getter` Rust script to retrieve data              |
-| `make format`        | Formats the code in `da-sender`, `da-getter`, and `deno` directories        |
+| `make format`        | Formats the code in `da-sender`, `da-getter`, and `validium` directories        |
 | `make validium`      | Runs the Deno script that retrieves pubdata from `ZKSync Era`, sends it and verifies it to Avail   |
 | `make validium-test`        | Runs Deno tests |
 | `make web-scraper`              | Sets up the web scraper virtual environment, installs dependencies, and runs the scraper       |

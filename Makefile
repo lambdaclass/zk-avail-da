@@ -1,4 +1,4 @@
-.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data get-data web-scraper web-scraper-install web-scraper-run web-scraper-venv web-scraper-clean
+.PHONY: avail-da clean build avail-da-full avail-da-testnet send-data get-data validium validium-test web-scraper web-scraper-install web-scraper-run web-scraper-venv web-scraper-clean
 
 avail-da: clean build
 	@echo "Starting Avail services..."
@@ -45,16 +45,16 @@ format:
 	cargo fmt
 	cd da-getter && \
 	cargo fmt
-	cd deno && \
+	cd validium && \
 	deno fmt
 	cd tools/web_scraper && source venv/bin/activate && autopep8 --recursive --exclude venv --in-place .
 
 validium:
-	cd deno && \
+	cd validium && \
 	deno task validium
 
 validium-test:
-	cd deno && \
+	cd validium && \
 	deno task test
 
 VENV_DIR = tools/web_scraper/venv
