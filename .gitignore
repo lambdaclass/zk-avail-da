@@ -6,3 +6,4 @@ account.json
 .env
 .vscode/
 venv/
+logs/
