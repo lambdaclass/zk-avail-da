@@ -20,7 +20,7 @@ jobs:
 
       - name: Set up .env
         run: |
-          cd deno
+          cd validium
           echo "AVAIL_RPC=${{ secrets.AVAIL_RPC }}" >> .env
           echo "SURI=${{ secrets.SURI }}" >> .env
           echo "DA_BRIDGE_ADDRESS=${{ secrets.DA_BRIDGE_ADDRESS }}" >> .env
@@ -29,4 +29,4 @@ jobs:
         shell: bash
       - name: Run tests
         run: |
-          cd deno && deno task test
+          cd validium && deno task test
