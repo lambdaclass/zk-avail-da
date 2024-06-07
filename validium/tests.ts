@@ -3,7 +3,13 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-import { ProofData, submitDataAndVerify, verifyProof } from "./validium.ts";
+import {
+  getPubdata,
+  ProofData,
+  submitDataAndVerify,
+  SubmitDataHash,
+  verifyProof,
+} from "./validium.ts";
 import { pubdataTest } from "./pubdata_test.ts";
 
 const env = await load();
@@ -63,11 +69,33 @@ Deno.test("verifyBlobLeaf function should return expected result", async () => {
   assertEquals(isVerified, expectedValue);
 });
 
+const resultHashes: SubmitDataHash[] = [];
+let isSubmitDataAndVerifyDone = false;
+
 Deno.test({
   name: "submitDataAndVerify",
   async fn() {
     for (const batch of pubdataTest) {
-      await submitDataAndVerify(batch);
+      resultHashes.push(await submitDataAndVerify(batch));
+    }
+    console.log(resultHashes);
+    isSubmitDataAndVerifyDone = true;
+  },
+  sanitizeOps: false,
+  sanitizeResources: false,
+});
+
+Deno.test({
+  name: "getPubdata function should return expected pubdata",
+  async fn() {
+    while (!isSubmitDataAndVerifyDone) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    let index = 0;
+    for (const hash of resultHashes) {
+      const result = await getPubdata(hash.txHash, hash.blockHash);
+      assertEquals(result, pubdataTest[index]);
+      index++;
     }
   },
   sanitizeOps: false,

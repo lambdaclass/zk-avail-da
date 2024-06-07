@@ -18,3 +18,12 @@ export function initializeAvailApi(availRpc: string): Promise<ApiPromise> {
 export function createAccount(suri: string): KeyringPair {
   return new Keyring({ type: "sr25519" }).addFromUri(suri);
 }
+
+export function writeJson(path: string, data: string): string {
+  try {
+    Deno.writeTextFileSync(path, JSON.stringify(data));
+    return "Written to " + path;
+  } catch (e) {
+    return e.message;
+  }
+}
