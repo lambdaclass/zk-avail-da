@@ -1,6 +1,7 @@
 {
   "tasks": {
     "validium": "deno run --allow-read --allow-net --allow-env main.ts",
-    "test": "deno test --allow-net --allow-read --allow-env tests.ts"
+    "test": "deno test --allow-net --allow-read --allow-env tests.ts",
+    "get-pubdata": "deno run --allow-write --allow-read --allow-net --allow-env get_pubdata.ts"
   }
 }

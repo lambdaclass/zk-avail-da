@@ -103,6 +103,18 @@ const isVerified = await contractInstance.verifyBlobLeaf([
 deno task test
 ```
 
+## Recover Pubdata from Turing Avail DA
+
+To get the pubdata from the Turing Avail DA, you can use the following command
+passing the transaction hash and block hash as arguments:
+
+```sh
+deno task get-pubdata <tx_hash> <block_hash>
+```
+
+This will return the pubdata of the transaction and write it into the `pubdata`
+folder.
+
 ## Faucet
 
 Use the [Polkadot extension](https://polkadot.js.org/extension/) to manage your

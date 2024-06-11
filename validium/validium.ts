@@ -4,7 +4,8 @@ import { ethers } from "npm:ethers@5.4";
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
 import ABI from "./abi/availbridge.json" with { type: "json" };
 import { KeyringPair } from "https://deno.land/x/polkadot@0.2.45/keyring/types.ts";
-import { createAccount, initializeAvailApi } from "./helpers.ts";
+import { createAccount, initializeAvailApi, writeJson } from "./helpers.ts";
+import { H256 } from "https://deno.land/x/polkadot@0.2.45/types/interfaces/types.ts";
 
 const env = await load();
 
@@ -39,6 +40,11 @@ export class ProofData {
 
 interface SubmitDataResult extends ISubmittableResult {
   blockNumber: string;
+}
+
+export interface SubmitDataHash {
+  txHash: string;
+  blockHash: string;
 }
 
 /**
@@ -167,4 +173,30 @@ export async function submitDataAndVerify(data: string) {
   }
   await proofAndVerify(result);
   await availApi.disconnect();
+  const submitDataHash: SubmitDataHash = {
+    txHash: result.txHash.toHex(),
+    blockHash: (result.status.asFinalized as H256).toHex(),
+  };
+  return submitDataHash;
+}
+
+export async function getPubdata(
+  tx_hash: string,
+  block_hash: string,
+): Promise<string> {
+  const availApi = await initializeAvailApi(AVAIL_RPC);
+  const block = await availApi.rpc.chain.getBlock(block_hash);
+  const tx = block.block.extrinsics.find((tx) => tx.hash.toHex() == tx_hash);
+  if (tx == undefined) {
+    console.log("Failed to find the Submit Data transaction");
+    Deno.exit(1);
+  }
+  console.log(tx.toHuman());
+  const dataHex = tx.method.args.map((a) => a.toString()).join(", ");
+  // Data retrieved from the extrinsic data
+  console.log(`submitted data: ${dataHex}`);
+  const fileName = `./pubdata/${tx_hash}.json`;
+  console.log(writeJson(fileName, dataHex));
+  await availApi.disconnect();
+  return dataHex;
 }
